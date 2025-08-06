@@ -1,49 +1,51 @@
 #mathematic model for shaft project.
 
 #class for a shaft object.
-class Shaft():
-    self.sections = []
-    self.supports = []
-    self.forces = []
-    self.mtot = []
+class Shaft:
+	sections = [] #sections, [raio, comprimento]
+	supports = [] #distance x of the 2 supports
+	forces = []   #forces in the shaft
+	mtot = []     #points of total moment to make the grafic
+	stress = []   #list of stress concentrations in the shaft
 
-    #constructor of the class shaft.
-    def __init__(self):
+	#constructor of the class shaft.
+	def __init__(self):
+		self.supports = [0,0]
 
-    #method to add a section to the list sections.
-    def AddSection(self, x1, y1, x2, y2):
-        self.sections.append([[x1,y1],[x2,y2]])
-        self.sections.sort()
+	#method to add a section to the list sections
+	def AddSection(self, x1, y1, x2, y2):
+		self.sections.append([[x1,y1],[x2,y2]])
+		self.sections.sort()
 
     #method to remove a section from the list sections.
-    def RemoveSection(self, i):
-        self.sections.remove(self.sections[i])
+	def RemoveSection(self, i):
+		self.sections.remove(self.sections[i])
 
     #method to add a position of a support in the list supports.
-    def AddSupport(self, x):
-        self.supports.append(x)
+	def AddSupport(self, x, i):
+		self.supports[i] = x
 
     #method to remove support from the list supports.
-    def RemoveSupport(self, i):
-        self.supports.remove(self.supports[i])
+	def RemoveSupport(self, i):
+		self.supports.remove(self.supports[i])
 
     #method to add a force to list forces. x is the x coordenate, y_or_z is the y or z coordenate, r_or_t is oriention(radial or tangential), plane is the plane hwere the force is (xy or xz) and F is the magnitude of the force.
-    def AddForce(self, x, y_or_z, r_or_t, plane, F):
-        if r_or_t == 't':
-            if plane == 'xy':
-                self.forces.append([x, y_or_z, 'xz', F])
-            elif plane == 'xz':
-                self.forces.append([x, y_or_z, 'xy', F])
-            else:
-                self.forces.append([x, y_or_z, plane, F])
-        self.forces.sort()
+	def AddForce(self, x, y_or_z, r_or_t, plane, F):
+		if r_or_t == 't':
+			if plane == 'xy':
+				self.forces.append([x, y_or_z, 'xz', F])
+			elif plane == 'xz':
+				self.forces.append([x, y_or_z, 'xy', F])
+			else:
+				self.forces.append([x, y_or_z, plane, F])
+		self.forces.sort()
 
     #method to remove a force from thelist forces.
-    def RemoveForce(self, i):
-        self.forces.remove(self.forces[i])
+	def RemoveForce(self, i):
+		self.forces.remove(self.forces[i])
 
-    def AddMoment(m):
-        self.mtot.append(m)
+	def AddMoment(m):
+		self.mtot.append(m)
 
 #function to calculate reactions in 2 supports in a shaft s.
 def Reactions(s):

@@ -1,12 +1,17 @@
 #main window for shaft project
-
+#arrumar posições e textos :(
 import tkinter as tk
 import tkinter.ttk as ttk
+import ShaftSectionWin as SecWin
+import ShaftStressWin as StrWin
+import ShaftForceWin as ForWin
+import ShaftSupportWin as SupWin
 
 class ShaftMainWindow:
 	def __init__(self):
 		#tk instance
 		self.root = tk.Tk()
+		self.controller = None
 
 		#window atributes
 		self.root.geometry('700x700')
@@ -14,24 +19,102 @@ class ShaftMainWindow:
 		self.root.resizable(False, False)
 
 		#root elements
-		canvas_axial = tk.Canvas(self.root, width=250, height=250, bg='white')
-		canvas_axial.place(x=10, y=10)
+		self.canvas_axial = tk.Canvas(self.root, width=250, height=250, bg='white')
+		self.canvas_axial.place(x=10, y=10)
 
-		canvas_long = tk.Canvas(self.root, width=420, height=250, bg='white')
-		canvas_long.place(x=270, y=10)
+		self.canvas_long = tk.Canvas(self.root, width=420, height=250, bg='white')
+		self.canvas_long.place(x=270, y=10)
 
-		frame_draw = ttk.Frame(self.root, width=680, height=400)
-		frame_draw.place(x=10, y=270)
+		self.frame_draw = ttk.Labelframe(self.root, text='Seções:', width=680, height=300)
+		self.frame_draw.place(x=10, y=270)
 
-		tree_sections = ttk.Treeview(frame_draw)
-		tree_sections.place(x=0, y=0, width=335, height=260)
-		treeviewScroll1 = tk.Scrollbar(tree_sections, orient=tk.VERTICAL)
+		self.frame_calc = ttk.Labelframe(self.root, text='Forças:', width=680, height=300)
+
+		self.button_next = ttk.Button(self.root, text='Próximo', command = lambda: self.SwitchFrames(True))
+		self.button_next.place(x=570, y=660, width=120, height=30)
+
+		self.button_back = ttk.Button(self.root, text='Voltar', command = lambda: self.SwitchFrames(False))
+		self.button_back.place(x=440, y=660, width=120, height=30)
+
+		self.button_cancel = ttk.Button(self.root, text='Cancelar', command = self.root.quit)
+		self.button_cancel.place(x=310, y=660, width=120, height=30)
+
+		#frame_draw elements
+		self.tree_sections = ttk.Treeview(self.frame_draw)
+		self.tree_sections.place(x=5, y=0, width=335, height=260)
+		treeviewScroll1 = tk.Scrollbar(self.tree_sections, orient=tk.VERTICAL)
 		treeviewScroll1.pack(side=tk.RIGHT, fill=tk.Y)
 
+		button_open_section_win = ttk.Button(self.frame_draw, text='Add section', command=self.OpenSectionWin)
+		button_open_section_win.place(x=350, y=10, width=150, height=25)
+
+		button_remove_section = ttk.Button(self.frame_draw, text='Remove section', command = lambda :[self.RemoveSection(), self.controller.UpdateSectionTreeview(),self.controller.UpdateCanvas()])
+		button_remove_section.place(x=510, y=10, width=150, height=25)
+
+		button_open_stress_win = ttk.Button(self.frame_draw, text='Add stress', command=self.OpenStressWin)
+		button_open_stress_win.place(x=350, y=45, width=150, height=25)
+
+		button_remove_stress = ttk.Button(self.frame_draw, text='Remove stress', command = lambda :[self.RemoveStress(), self.controller.UpdateSectionTreeview(), self.controller.UpdateCanvas()])
+		button_remove_stress.place(x=510, y=45, width=150, height=25)
+
+		#frame_calc elements
+		self.tree_forces = ttk.Treeview(self.frame_calc)
+		self.tree_forces.place(x=5, y=0, width=335, height=260)
+		treeviewScroll2 = tk.Scrollbar(self.tree_forces, orient=tk.VERTICAL)
+		treeviewScroll2.pack(side=tk.RIGHT, fill=tk.Y)
+
+		button_open_force_win = ttk.Button(self.frame_calc, text='Add force', command=self.OpenForceWin)
+		button_open_force_win.place(x=350, y=10, width=150, height=25)
+
+		button_remove_force = ttk.Button(self.frame_calc, text='Remove force', command = lambda: [self.RemoveForce(), self.controller.UpdateForceTreeview(), self.controller.UpdateCanvas()])
+		button_remove_force.place(x=510, y=10, width=150, height=25)
+
+		button_open_support_win = ttk.Button(self.frame_calc, text='Add support', command=self.OpenSupportWin)
+		button_open_support_win.place(x=350, y=45, width=150, height=25)
+
+		button_edit_support = ttk.Button(self.frame_calc, text='Editar suporte')#, command = lambda: [self.RemoveSupport(),self.OpenSupportWin()])
+		button_edit_support.place(x=510, y=45, width=150, height=25)
+
+
+	def SetController(self, controller):
+		self.controller = controller
+
+	def SwitchFrames(self, go_next):
+		if(go_next):
+			if(self.frame_draw.winfo_ismapped()):
+				self.frame_calc.place(x=10, y=270)
+				self.frame_draw.place_forget()
+			elif(self.frame_calc.winfo_ismapped()):
+				print('calculando...')
+		else:
+			if(self.frame_calc.winfo_ismapped()):
+				self.frame_draw.place(x=10, y=270)
+				self.frame_calc.place_forget()
+
+	def OpenSectionWin(self):
+		SectionWindow = SecWin.ShaftSectionWindow(self.root, self.controller)
+
+	def OpenStressWin(self):
+		StressWindow = StrWin.ShaftStressWindow(self.root, self.controller)
+
+	def OpenForceWin(self):
+		ForceWindow = ForWin.ShaftForceWindow(self.root, self.controller)
+
+	def OpenSupportWin(self):
+		SupportWindow = SupWin.ShaftSupportWindow(self.root, self.controller)
+
+	def RemoveSection(self):
+		s = self.tree_sections.focus()
+		self.controller.RemoveSection(self.tree_sections.index(s))
+
+	def RemoveForce(self):
+		f = self.tree_forces.focus()
+		self.controller.RemoveForce(self.tree_forces.index(f))
 
 	def run(self):
 		self.root.mainloop()
 
 #test
-win = ShaftMainWindow()
-win.run()
+#win = ShaftMainWindow()
+
+#win.run()
