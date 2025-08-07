@@ -21,9 +21,21 @@ class ShaftMainWindow:
 		#root elements
 		self.canvas_axial = tk.Canvas(self.root, width=250, height=250, bg='white')
 		self.canvas_axial.place(x=10, y=10)
+		self.canvas_axial.create_line(((10,240),(10,220)), fill='black', width=1)
+		self.canvas_axial.create_line(((10,240),(30,240)), fill='black', width=1)
+		self.canvas_axial.create_polygon(((5,220),(10,210),(15,220)),fill='black')
+		self.canvas_axial.create_polygon(((30,235),(40,240),(30,245)),fill='black')
+		self.canvas_axial.create_text((45, 240), text='z', fill='black', font='tkDefaultFont 10')
+		self.canvas_axial.create_text((10, 200), text='y', fill='black', font='tkDefaultFont 10')
 
 		self.canvas_long = tk.Canvas(self.root, width=420, height=250, bg='white')
 		self.canvas_long.place(x=270, y=10)
+		self.canvas_long.create_line(((10,240),(10,220)), fill='black', width=1)
+		self.canvas_long.create_line(((10,240),(30,240)), fill='black', width=1)
+		self.canvas_long.create_polygon(((5,220),(10,210),(15,220)),fill='black')
+		self.canvas_long.create_polygon(((30,235),(40,240),(30,245)),fill='black')
+		self.canvas_long.create_text((45, 240), text='x', fill='black', font='tkDefaultFont 10')
+		self.canvas_long.create_text((10, 200), text='y', fill='black', font='tkDefaultFont 10')
 
 		self.frame_draw = ttk.Labelframe(self.root, text='Seções:', width=680, height=300)
 		self.frame_draw.place(x=10, y=270)
@@ -69,12 +81,8 @@ class ShaftMainWindow:
 		button_remove_force = ttk.Button(self.frame_calc, text='Remove force', command = lambda: [self.RemoveForce(), self.controller.UpdateForceTreeview(), self.controller.UpdateCanvas()])
 		button_remove_force.place(x=510, y=10, width=150, height=25)
 
-		button_open_support_win = ttk.Button(self.frame_calc, text='Add support', command=self.OpenSupportWin)
-		button_open_support_win.place(x=350, y=45, width=150, height=25)
-
-		button_edit_support = ttk.Button(self.frame_calc, text='Editar suporte')#, command = lambda: [self.RemoveSupport(),self.OpenSupportWin()])
-		button_edit_support.place(x=510, y=45, width=150, height=25)
-
+		button_open_support_win = ttk.Button(self.frame_calc, text='Editar suporte', command=self.OpenSupportWin)
+		button_open_support_win.place(x=350, y=45, width=310, height=25)
 
 	def SetController(self, controller):
 		self.controller = controller

@@ -29,18 +29,18 @@ class Shaft:
 	def RemoveSupport(self, i):
 		self.supports.remove(self.supports[i])
 
-    #method to add a force to list forces. x is the x coordenate, y_or_z is the y or z coordenate, r_or_t is oriention(radial or tangential), plane is the plane hwere the force is (xy or xz) and F is the magnitude of the force.
-	def AddForce(self, x, y_or_z, r_or_t, plane, F):
-		if r_or_t == 't':
-			if plane == 'xy':
-				self.forces.append([x, y_or_z, 'xz', F])
-			elif plane == 'xz':
-				self.forces.append([x, y_or_z, 'xy', F])
-			else:
-				self.forces.append([x, y_or_z, plane, F])
+    #method to add a force to list forces. x is the x coordenate, y_or_z is the y or z coordenate, tangential is bool value (True if is tangential), plane_xy is a bool value (True if is in xy) and F is the magnitude.
+	def AddForce(self, x, y_or_z, tangential, plane_xy, F):
+		if tangential:
+			if plane_xy:
+				self.forces.append([x, y_or_z, tangential, False, F])
+			elif not plane_xy:
+				self.forces.append([x, y_or_z, tangential, True, F])
+		else:
+			self.forces.append([x, y_or_z, tangential, plane_xy, F])
 		self.forces.sort()
 
-    #method to remove a force from thelist forces.
+    #method to remove a force from the list forces.
 	def RemoveForce(self, i):
 		self.forces.remove(self.forces[i])
 
@@ -59,11 +59,12 @@ def Reactions(s):
 	#add info needed for calculate the reactions in the second support(sum of momentum equals zero).
 	for force in s.forces:
 		if force[0] < s.supports[0]:
-			force[3] = -force[3]
-		if force[2] == 'xy':
-			xy.append([force[0], force[3]])
+			force[4] = -force[4]
+
+		if force[3]:
+			xy.append([force[0], force[4]])
 		else:
-			xz.append([force[0], force[3]])
+			xz.append([force[0], force[4]])
 
 	#calculate the reactions of the second support.
 	for force in xy:
@@ -98,10 +99,10 @@ def Bending_Moment(s):
 
 	#separete forces by plane.
 	for f in s.forces:
-		if f[2] == 'xy':
-			fxy.append([f[0], f[3]])
-		if f[2] == 'xz':
-			fxz.append([f[0], f[3]])
+		if f[3]:
+			fxy.append([f[0], f[4]])
+		if not f[3]:
+			fxz.append([f[0], f[4]])
 
 	#calculate the distance between each point and sum forces.
 	for i in range(len(fxy)):

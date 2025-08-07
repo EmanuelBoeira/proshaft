@@ -31,7 +31,7 @@ class ShaftSupportWindow:
 		self.x = tk.Entry(self.root, width=100)
 		self.x.place(x=145, y=100, width=100)
 
-		self.buttonAddSupp = ttk.Button(self.root, text='Adicionar', command = lambda: [self.controller.AddSupportToModel(float(self.x.get()), int(self.support.get())), self.controller.UpdateCanvas(), self.root.destroy()])
+		self.buttonAddSupp = ttk.Button(self.root, text='Modificar', command = lambda: [self.controller.ModifySupport(float(self.x.get()), int(self.support.get())), self.controller.UpdateCanvas(), self.root.destroy()])
 		self.buttonAddSupp.place(x=160, y=160, width=120, height=30)
 
 		self.buttonCancel = tk.Button(self.root, text='Cancelar', command = self.root.destroy)
