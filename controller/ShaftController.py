@@ -25,7 +25,7 @@ class ShaftController:
 		if self.model.sections == []:
 			self.model.AddSection(x1, y1, x2, y2)
 		else:
-			x = section[-1][0]
+			x = float(self.model.sections[-1][1][0])
 			self.model.AddSection(x, y1, (x+x2), y2)
 
 	#remove section
