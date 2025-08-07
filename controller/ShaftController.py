@@ -1,5 +1,6 @@
 #controller for shaft project
 #remake this shit
+#imports{{{
 import sys
 sys.path.append('../model/')
 sys.path.append('../view/')
@@ -8,7 +9,9 @@ import tkinter as tk
 
 import ShaftModel as Shaft
 import ShaftMainWin as MainWin
+#}}}
 
+#Class ShaftController{{{
 class ShaftController:
 	#init the class
 	def __init__(self, model, view):
@@ -30,7 +33,14 @@ class ShaftController:
 
 	#remove section
 	def RemoveSection(self, i):
-		self.model.RemoveSection(i)
+		#for section in self.model.sections:
+			#print(i)
+			#if self.model.sections.index(section) >= i:
+				#print(self.model.sections)
+				#self.model.RemoveSection(self.model.sections.index(section))
+		for x in range(len(self.model.sections)-i):
+			self.model.RemoveSection(i)
+
 
 	#add methods to add e remove stress
 
@@ -66,11 +76,13 @@ class ShaftController:
 			for force in self.model.forces:
 				self.view.tree_forces.insert('', tk.END, text='F: %s N'%(force[4]))
 
-	#update canvas_long and canvas_axial
+	#{{{update canvas_long and canvas_axial
 	def UpdateCanvas(self):
 		#clean canvas
 		self.view.canvas_long.delete('all')
 		self.view.canvas_axial.delete('all')
+
+		self.view.DrawOrientationCanvas()
 
 		if self.model.sections != []:
 			fator = 1
@@ -109,7 +121,10 @@ class ShaftController:
 
 			for support in self.model.supports:
 				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
+	#}}}
+#}}}
 
+#Function drawArrowV{{{
 #functions to draw elements in canvas
 def drawArrowV(canvas, x, y, positive):
 	if positive:
@@ -119,7 +134,9 @@ def drawArrowV(canvas, x, y, positive):
 	else:
 		canvas.create_polygon(((x-5,y-5),(x,y),(x+5,y-5)),fill='red')
 		canvas.create_line(((x,y-5),(x,y-25)),width=4,fill='red')
+#}}}
 
+#Function drawArrowH{{{
 def drawArrowH(canvas, x, y, positive):
 	if positive:
 		canvas.create_polygon(((x,y),(x-5,y+5),(x-5,y-5)), fill='red')
@@ -128,10 +145,14 @@ def drawArrowH(canvas, x, y, positive):
 	else:
 		canvas.create_polygon(((x,y),(x+5,y-5),(x+5,y+5)), fill='red')
 		canvas.create_line(((x+5, y),(x+25,y)), width=4, fill='red')
+#}}}
 
+#Function drawSupport{{{
 def drawSupport(canvas, x, y):
 	canvas.create_polygon(((x-10,y+10),(x,y),(x+10,y+10)), fill='black')
+#}}}
 
+#Function drawKey{{{
 def drawKey(canvas, x, y, l, b):
 	canvas.create_line(((x+(b/2), y+(b/2)),(x+l-(b/2), y+(b/2))), width=1, fill='black')
 	canvas.create_arc(((x+l-(b/2), y+(b/2)),(x+l, y)), style=tk.ARC, width=2)
@@ -139,3 +160,4 @@ def drawKey(canvas, x, y, l, b):
 	canvas.create_line(((x+l-(b/2), y-(b/2)),(x+(b/2), y-(b/2))), width=1, fill='black')
 	canvas.create_arc(((x+(b/2), y-(b/2)),(x, y)), style=tk.ARC, width=2)
 	canvas.create_arc(((x, y),(x+(b/2), y+(b/2))), style=tk.ARC, width=2)
+#}}}

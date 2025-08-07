@@ -1,7 +1,7 @@
 #mathematic model for shaft project.
-
+#Class Shaft {{{
 #class for a shaft object.
-class Shaft:
+class Shaft: 
 	sections = [] #sections, [raio, comprimento]
 	supports = [] #distance x of the 2 supports
 	forces = []   #forces in the shaft
@@ -46,9 +46,11 @@ class Shaft:
 
 	def AddMoment(m):
 		self.mtot.append(m)
+#}}}
 
+#Function Reaction {{{
 #function to calculate reactions in 2 supports in a shaft s.
-def Reactions(s):
+def Reactions(s): 
 	xy = []
 	xz = []
 	rxy1 = 0
@@ -88,8 +90,9 @@ def Reactions(s):
 
 	#sort the forces in order of x.
 	s.forces.sort()
+#}}}
 
-
+#Function Bending_Moment{{{
 #function to calculate bending moment to a shaft s.
 def Bending_Moment(s):
 	fxy = []
@@ -133,15 +136,21 @@ def Bending_Moment(s):
 	#calculate the total moment.
 	for i in range(len(mxy)-1):
 		s.AddMoment(((mxy[i]**2) + (mxz[i])**2)**0.5)
+#}}}
 
+#Function Se{{{
 #function to calculate fatigue endurance limit.
 def Se(Sut, ka, kb, kc, kd, ke, kf):
 	return (0.5*Sut)*ka*kb*kc*kd*ke*kf
+#}}}
 
+#function ka{{{
 #function to calculate factor  ka.
 def ka(Sut, x, y):
 	return x*(Sut**y)
+#}}}
 
+#Function kb{{{
 #function to calculate factor kb for torcion and bending.
 def kb(d):
 	if d <= 51 and d >= 2.8:
@@ -150,7 +159,10 @@ def kb(d):
 		return 1.51 * (d*(-0.157))
 	else:
 		return 0
+#}}}
 
+#Function dmin_VonMisses{{{
 #function to calculate minimum diamiter by Von Misses.
-def dmin(nf, Kf, Kfs, Ma, Tm, Se, Sy):
+def dmin_VonMisses(nf, Kf, Kfs, Ma, Tm, Se, Sy):
 	return ((16*nf/3.1415)*(((4*((Kf*Ma/Se)**2))+(3*((Kfs*Tm/Sy)**2)))**(0.5)))**(1/3)
+#}}}
