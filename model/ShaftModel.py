@@ -6,7 +6,7 @@ class Shaft:
 	supports = [] #distance x of the 2 supports
 	forces = []   #forces in the shaft
 	mtot = []     #points of total moment to make the grafic
-	stress = []   #list of stress concentrations in the shaft
+	stress = []   #list of stress concentrations in the shaft [type, x, l]
 
 	#constructor of the class shaft.
 	def __init__(self):
@@ -43,6 +43,13 @@ class Shaft:
     #method to remove a force from the list forces.
 	def RemoveForce(self, i):
 		self.forces.remove(self.forces[i])
+
+	def AddStress(self, x, l, b, stress):
+		self.stress.append([x, l, b, stress])
+		self.stress.sort()
+
+	def RemoveStress(self, i):
+		self.stress.remove(self.stress[i])
 
 	def AddMoment(m):
 		self.mtot.append(m)

@@ -43,6 +43,12 @@ class ShaftController:
 
 
 	#add methods to add e remove stress
+	def AddStressToModel(self, stress, x, l, b):
+		self.model.AddStress(x, l, b, stress)
+
+	def RemoveStress(self, i):
+		for stress in self.model.stress:
+			self.model.RemoveStress(i)
 
 	#update the informations of sections treeview
 	def UpdateSectionTreeview(self):
@@ -53,6 +59,11 @@ class ShaftController:
 		if self.model.sections != []:
 			for section in self.model.sections:
 				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(((section[0][1])*2, (section[1][0]-section[0][0]))))
+
+		if self.model.stress != []:
+			for stress in self.model.stress:
+				self.view.tree_sections.insert('', tk.END, text='Chaveta x: %s mm'%(stress[0]))
+				
 
 	#add force to model
 	def AddForceToModel(self, x, y, tangential, plane_xy, F):
@@ -121,7 +132,17 @@ class ShaftController:
 
 			for support in self.model.supports:
 				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
+
+			if self.model.stress != []:
+				for stress in self.model.stress:
+					if stress[3] == 'flat key':
+						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator , 125, stress[1]*fator, stress[2]*fator)
 	#}}}
+
+	def CalculateDminVonMisses(self):
+		Shaft.Reactions(self.model)
+		Shaft.Bending_Moment(self.model)
+		print(self.model.mtot)
 #}}}
 
 #Function drawArrowV{{{
@@ -153,11 +174,11 @@ def drawSupport(canvas, x, y):
 #}}}
 
 #Function drawKey{{{
-def drawKey(canvas, x, y, l, b):
-	canvas.create_line(((x+(b/2), y+(b/2)),(x+l-(b/2), y+(b/2))), width=1, fill='black')
-	canvas.create_arc(((x+l-(b/2), y+(b/2)),(x+l, y)), style=tk.ARC, width=2)
-	canvas.create_arc(((x+l, y),(x+l-(b/2), y-(b/2))), style=tk.ARC, width=2)
-	canvas.create_line(((x+l-(b/2), y-(b/2)),(x+(b/2), y-(b/2))), width=1, fill='black')
-	canvas.create_arc(((x+(b/2), y-(b/2)),(x, y)), style=tk.ARC, width=2)
-	canvas.create_arc(((x, y),(x+(b/2), y+(b/2))), style=tk.ARC, width=2)
+def drawFlatKey(canvas, x, y, l, b):
+	canvas.create_line(((x+(b/2)-15, y-(b/2)),(x+l-(b/2)+15, y-(b/2))), width=2, fill='black')
+	canvas.create_arc(((x+l-(b/2), y-(b/2)),(x+l, y+25)), start=0, style=tk.ARC, width=2)
+	canvas.create_arc(((x+l, y-25),(x+l-(b/2), y+(b/2))), start=270, style=tk.ARC, width=2)
+	canvas.create_line(((x+l-(b/2)+15, y+(b/2)),(x+(b/2)-15, y+(b/2))), width=2, fill='black')
+	canvas.create_arc(((x+(b/2), y+(b/2)),(x, y-25)), start=180, style=tk.ARC, width=2)
+	canvas.create_arc(((x, y+25),(x+(b/2), y-(b/2))), start=90, style=tk.ARC, width=2)
 #}}}
