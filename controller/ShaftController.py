@@ -6,6 +6,8 @@ sys.path.append('../model/')
 sys.path.append('../view/')
 
 import tkinter as tk
+import matplotlib.pyplot as plt
+#import numpy as np
 
 import ShaftModel as Shaft
 import ShaftMainWin as MainWin
@@ -142,7 +144,23 @@ class ShaftController:
 	def CalculateDminVonMisses(self):
 		Shaft.Reactions(self.model)
 		Shaft.Bending_Moment(self.model)
-		print(self.model.mtot)
+		x = []
+
+		for f in self.model.forces:
+			if x != []:
+				if f[0] == x[-1]:
+					continue
+				else:
+					x.append(f[0])
+			else:
+				x.append(f[0])
+				self.model.mtot.insert(0, f[0])
+
+		self.model.mtot.append(0)
+
+		fig, ax = plt.subplots()
+		ax.plot(x, self.model.mtot)
+		plt.show()
 #}}}
 
 #Function drawArrowV{{{

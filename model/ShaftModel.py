@@ -51,7 +51,7 @@ class Shaft:
 	def RemoveStress(self, i):
 		self.stress.remove(self.stress[i])
 
-	def AddMoment(m):
+	def AddMoment(self, m):
 		self.mtot.append(m)
 #}}}
 
@@ -74,26 +74,26 @@ def Reactions(s):
 			xy.append([force[0], force[4]])
 		else:
 			xz.append([force[0], force[4]])
-
+	
 	#calculate the reactions of the second support.
 	for force in xy:
 		rxy2 = rxy2 + (force[0] * force[1])
 	rxy2 = (-1)*rxy2/s.supports[1]
-	s.AddForce(s.supports[1], 0, 'r', 'xy', rxy2)
+	s.AddForce(s.supports[1], 0, False, True, rxy2)
 
 	for force in xz:
 		rxz2 = rxz2 + (force[0] * force[1])
 	rxz2 = (-1)*rxz2/s.supports[1]
-	s.AddForce(s.supports[1], 0, 'r', 'xz', rxz2)
+	s.AddForce(s.supports[1], 0, False, False, rxz2)
 
 	#calculate the reactions of the first support.
 	for force in s.forces:
-		if force[2] == 'xy':
-			rxy1 = rxy1 + force[3]
-		if force[2] == 'xz':
-			rxz1 = rxz1 + force[3]
-	s.AddForce(s.supports[0], 0, 'r', 'xy', (-1)*rxy1)
-	s.AddForce(s.supports[0], 0, 'r', 'xz', (-1)*rxz1)
+		if force[3]:
+			rxy1 = rxy1 + force[4]
+		if not force[3]:
+			rxz1 = rxz1 + force[4]
+	s.AddForce(s.supports[0], 0, False, True, (-1)*rxy1)
+	s.AddForce(s.supports[0], 0, False, False, (-1)*rxz1)
 
 	#sort the forces in order of x.
 	s.forces.sort()
@@ -114,6 +114,8 @@ def Bending_Moment(s):
 		if not f[3]:
 			fxz.append([f[0], f[4]])
 
+	#print(fxy)
+
 	#calculate the distance between each point and sum forces.
 	for i in range(len(fxy)):
 		if i+1 < len(fxy):
@@ -129,6 +131,8 @@ def Bending_Moment(s):
 
 	fxz.remove(fxz[-1])
 
+	#print(fxy)
+
 	#multiplicate force by distance(integral by area).
 	for f in fxy:
 		mxy.append(f[0] * f[1])
@@ -142,7 +146,7 @@ def Bending_Moment(s):
 	
 	#calculate the total moment.
 	for i in range(len(mxy)-1):
-		s.AddMoment(((mxy[i]**2) + (mxz[i])**2)**0.5)
+		s.AddMoment(float(((mxy[i]**2) + (mxz[i])**2)**0.5)/1000)
 #}}}
 
 #Function Se{{{
@@ -173,3 +177,15 @@ def kb(d):
 def dmin_VonMisses(nf, Kf, Kfs, Ma, Tm, Se, Sy):
 	return ((16*nf/3.1415)*(((4*((Kf*Ma/Se)**2))+(3*((Kfs*Tm/Sy)**2)))**(0.5)))**(1/3)
 #}}}
+
+#exemplo:
+#shaft1 = Shaft()
+#shaft1.AddSection(0,10,250,10)
+#shaft1.AddSection(250,20,260,20)
+#shaft1.AddForce(50, 10, 'r', 'xy', -876)
+#shaft1.AddForce(50, 10, 'r', 'xz', 2400)
+#shaft1.AddForce(195, 10, 'r', 'xy', -3937)
+#shaft1.AddForce(195, 10, 'r', 'xz', -10814)
+#shaft1.AddSupport(0)
+#shaft1.AddSupport(250)
+

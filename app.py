@@ -14,6 +14,14 @@ import ShaftController as ShaftControl
 #start the aplication
 main_win = MainWin.ShaftMainWindow()
 shaft = Shaft.Shaft()
+shaft.AddSection(0,10,250,10)
+shaft.AddForce(50, 10, False, True, -876)
+shaft.AddForce(50, 10, False, False, 2400)
+shaft.AddForce(195, 10, False, True, -3937)
+shaft.AddForce(195, 10, False, False, -10814)
+shaft.AddSupport(0,0)
+shaft.AddSupport(250,1)
+
 control = ShaftControl.ShaftController(shaft, main_win)
 
 main_win.SetController(control)

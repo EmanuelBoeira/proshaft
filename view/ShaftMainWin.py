@@ -82,6 +82,7 @@ class ShaftMainWindow:
 				self.frame_draw.place_forget()
 			elif(self.frame_calc.winfo_ismapped()):
 				print('calculando...')
+				self.controller.CalculateDminVonMisses()
 		else:
 			if(self.frame_calc.winfo_ismapped()):
 				self.frame_draw.place(x=10, y=270)
