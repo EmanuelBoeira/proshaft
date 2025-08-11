@@ -23,6 +23,9 @@ shaft.AddSupport(0,0)
 shaft.AddSupport(250,1)
 
 control = ShaftControl.ShaftController(shaft, main_win)
+control.UpdateSectionTreeview()
+control.UpdateForceTreeview()
+control.UpdateCanvas()
 
 main_win.SetController(control)
 main_win.run()

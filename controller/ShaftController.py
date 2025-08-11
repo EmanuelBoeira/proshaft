@@ -193,10 +193,8 @@ def drawSupport(canvas, x, y):
 
 #Function drawKey{{{
 def drawFlatKey(canvas, x, y, l, b):
-	canvas.create_line(((x+(b/2)-15, y-(b/2)),(x+l-(b/2)+15, y-(b/2))), width=2, fill='black')
-	canvas.create_arc(((x+l-(b/2), y-(b/2)),(x+l, y+25)), start=0, style=tk.ARC, width=2)
-	canvas.create_arc(((x+l, y-25),(x+l-(b/2), y+(b/2))), start=270, style=tk.ARC, width=2)
-	canvas.create_line(((x+l-(b/2)+15, y+(b/2)),(x+(b/2)-15, y+(b/2))), width=2, fill='black')
-	canvas.create_arc(((x+(b/2), y+(b/2)),(x, y-25)), start=180, style=tk.ARC, width=2)
-	canvas.create_arc(((x, y+25),(x+(b/2), y-(b/2))), start=90, style=tk.ARC, width=2)
+	canvas.create_rectangle(((x+(b/2),y-(b/2)),(x+l-(b/2), y+(b/2))), outline='black', width=2)
+	canvas.create_oval(((x, y-(b/2)),(x+b, y+(b/2))), outline='black', width=2)
+	canvas.create_oval(((x+l-b, y-(b/2)),(x+l, y+(b/2))), outline='black', width=2)
+	canvas.create_rectangle(((x+(b/2),y-(b/2)+2),(x+l-(b/2), y+(b/2)-2)), outline='white', fill='white', width=2)
 #}}}
