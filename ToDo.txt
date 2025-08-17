@@ -1,5 +1,0 @@
--fazer tela de stress
--arrumar UI
--executar calculos
--gerar gráficos
-

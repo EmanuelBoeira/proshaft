@@ -6,6 +6,7 @@ sys.path.append('../model/')
 sys.path.append('../view/')
 
 import tkinter as tk
+from tkinter.messagebox import showwarning
 import matplotlib.pyplot as plt
 #import numpy as np
 
@@ -35,11 +36,6 @@ class ShaftController:
 
 	#remove section
 	def RemoveSection(self, i):
-		#for section in self.model.sections:
-			#print(i)
-			#if self.model.sections.index(section) >= i:
-				#print(self.model.sections)
-				#self.model.RemoveSection(self.model.sections.index(section))
 		for x in range(len(self.model.sections)-i):
 			self.model.RemoveSection(i)
 
@@ -69,7 +65,10 @@ class ShaftController:
 
 	#add force to model
 	def AddForceToModel(self, x, y, tangential, plane_xy, F):
-		self.model.AddForce(x, y, tangential, plane_xy, F)
+		if self.model.sections[-1][1][0] > x:
+			self.model.AddForce(x, y, tangential, plane_xy, F)
+		else:
+			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 
 	#remove force
 	def RemoveForce(self, i):
@@ -77,7 +76,10 @@ class ShaftController:
 
 	#modify the distance x of the support i
 	def ModifySupport(self, x, i):
-		self.model.AddSupport(x, i)
+		if self.model.sections[-1][1][0] > x:
+			self.model.AddSupport(x, i)
+		else:
+			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 
 	#update the info of treeview forces
 	def UpdateForceTreeview(self):
@@ -197,4 +199,12 @@ def drawFlatKey(canvas, x, y, l, b):
 	canvas.create_oval(((x, y-(b/2)),(x+b, y+(b/2))), outline='black', width=2)
 	canvas.create_oval(((x+l-b, y-(b/2)),(x+l, y+(b/2))), outline='black', width=2)
 	canvas.create_rectangle(((x+(b/2),y-(b/2)+2),(x+l-(b/2), y+(b/2)-2)), outline='white', fill='white', width=2)
+#}}}
+
+#Function drawStopRing{{{
+def drawStopRing(canvas, x, y, D, d, s):
+	canvas.create_rectangle((x, y-(D/2)),(x+s, y+(D/2)), outline='white', fill='white', width=2)
+	canvas.create_rectangle((x, y-(d/2)),(x+s, y+(d/2)), outline='black', fill='white', width=2)
+	canvas.create_line((x, y-(D/2)),(x, y+(D/2)), fill='black', width=2)
+	canvas.create_line((x+s, y-(D/2)),(x+s, y+(D/2)), fill='black', width=2)
 #}}}

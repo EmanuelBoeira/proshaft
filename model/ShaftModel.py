@@ -36,8 +36,9 @@ class Shaft:
 				self.forces.append([x, y_or_z, tangential, False, F])
 			elif not plane_xy:
 				self.forces.append([x, y_or_z, tangential, True, F])
+		#for radial forces, y or z doesn't matters
 		else:
-			self.forces.append([x, y_or_z, tangential, plane_xy, F])
+			self.forces.append([x, 0, tangential, plane_xy, F])
 		self.forces.sort()
 
     #method to remove a force from the list forces.
