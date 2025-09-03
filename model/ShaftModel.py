@@ -143,6 +143,7 @@ def Bending_Moment(s):
 	#sum the moments.
 	for i in range(len(mxy)-1):
 		mxy[i+1] = mxy[i] + mxy[i+1]
+	for i in range(len(mxz)-1):
 		mxz[i+1] = mxz[i] + mxz[i+1]
 	
 	#calculate the total moment.
