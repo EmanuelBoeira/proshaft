@@ -81,13 +81,13 @@ def Reactions(s):
 
 	#calculate the reactions of the second support.
 	for force in s.forces_xy:
-		rxy2 = rxy2 + (force[0] * force[2])
-	rxy2 = (-1)*rxy2/s.supports[1]
+		rxy2 = rxy2 + ((force[0]-s.supports[0]) * force[2])
+	rxy2 = (-1)*rxy2/(s.supports[1]-s.supports[0])
 	s.AddForce(s.supports[1], 0, False, True, rxy2)
 
 	for force in s.forces_xz:
-		rxz2 = rxz2 + (force[0] * force[2])
-	rxz2 = (-1)*rxz2/s.supports[1]
+		rxz2 = rxz2 + ((force[0]-s.supports[0]) * force[2])
+	rxz2 = (-1)*rxz2/(s.supports[1]-s.supports[0])
 	s.AddForce(s.supports[1], 0, False, False, rxz2)
 
 	#calculate the reactions of the first support.
