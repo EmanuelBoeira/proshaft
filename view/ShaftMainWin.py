@@ -33,6 +33,8 @@ class ShaftMainWindow:
 
 		self.frame_calc = ttk.Labelframe(self.root, text='Forças:', width=680, height=325)
 
+		self.frame_plots = ttk.Labelframe(self.root, text='Gráficos', width=680, height=325)
+
 		self.button_next = ttk.Button(self.root, text='Próximo', command = lambda: self.SwitchFrames(True))
 		self.button_next.place(x=570, y=610, width=120, height=30)
 
@@ -63,7 +65,7 @@ class ShaftMainWindow:
 		button_open_stress_win = ttk.Button(self.frame_draw, text='Add stress', command=self.OpenStressWin)
 		button_open_stress_win.place(x=345, y=270, width=160, height=25)
 
-		button_remove_stress = ttk.Button(self.frame_draw, text='Remove stress', command = lambda :[self.RemoveStress(), self.controller.UpdateSectionTreeview(), self.controller.UpdateCanvas()])
+		button_remove_stress = ttk.Button(self.frame_draw, text='Remove stress', command = lambda :[self.RemoveStress(), self.controller.UpdateStressTreeview(), self.controller.UpdateCanvas()])
 		button_remove_stress.place(x=515, y=270, width=160, height=25)
 		#}}}
 
@@ -83,6 +85,25 @@ class ShaftMainWindow:
 		button_open_support_win.place(x=350, y=235, width=310, height=25)
 		#}}}
 
+		#frame_plots elements{{{
+
+		self.listbox_plots = tk.Listbox(self.frame_plots)
+		self.listbox_plots.insert(1, 'F(XY)')
+		self.listbox_plots.insert(2, 'F(XZ)')
+		self.listbox_plots.insert(3, 'F(TOT)')
+		self.listbox_plots.insert(4, 'M(XY)')
+		self.listbox_plots.insert(5, 'M(XZ)')
+		self.listbox_plots.insert(6, 'M(TOT)')
+		self.listbox_plots.insert(7, 'Torque')
+		self.listbox_plots.place(x=0, y=5, width=130, height=290)
+
+		self.listbox_plots.bind('<<ListboxSelect>>', self.DrawPlot)
+
+		self.canvas_plots = tk.Canvas(self.frame_plots, width=540, height=290, bg='white')
+		self.canvas_plots.place(x=130, y=5)
+
+		#}}}
+
 	def SetController(self, controller):
 		self.controller = controller
 
@@ -92,12 +113,19 @@ class ShaftMainWindow:
 				self.frame_calc.place(x=10, y=270)
 				self.frame_draw.place_forget()
 			elif(self.frame_calc.winfo_ismapped()):
+				self.frame_plots.place(x=10, y=270)
+				self.frame_calc.place_forget()
 				print('calculando...')
-				self.controller.CalculateDminVonMisses()
+				self.controller.CalculateShaft()
+			elif(self.frame_plots.winfo_ismapped()):
+				print('gerar pdf...')
 		else:
 			if(self.frame_calc.winfo_ismapped()):
 				self.frame_draw.place(x=10, y=270)
 				self.frame_calc.place_forget()
+			elif(self.frame_plots.winfo_ismapped()):
+				self.frame_calc.place(x=10, y=270)
+				self.frame_plots.place_forget()
 
 	def OpenSectionWin(self):
 		SectionWindow = SecWin.ShaftSectionWindow(self.root, self.controller)
@@ -113,11 +141,20 @@ class ShaftMainWindow:
 
 	def RemoveSection(self):
 		s = self.tree_sections.focus()
-		self.controller.RemoveSection(self.tree_sections.index(s))
+		self.controller.RemoveSection(self.tree_sections.index(s), True)
+
+	def RemoveStress(self):
+		s = self.tree_stress.focus()
+		self.controller.RemoveStress(self.tree_stress.index(s))
 
 	def RemoveForce(self):
 		f = self.tree_forces.focus()
 		self.controller.RemoveForce(self.tree_forces.index(f))
+
+	def DrawPlot(self, event):
+		for i in self.listbox_plots.curselection():
+			self.controller.PlotInCanvas(self.listbox_plots.get(i))
+			print(self.listbox_plots.get(i))
 
 	def DrawOrientationCanvas(self):
 		self.canvas_axial.create_line(((10,240),(10,220)), fill='black', width=1)

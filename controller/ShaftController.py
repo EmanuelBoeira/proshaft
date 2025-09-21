@@ -7,7 +7,7 @@ sys.path.append('../view/')
 
 import tkinter as tk
 from tkinter.messagebox import showwarning
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #import numpy as np
 
 import ShaftModel as Shaft
@@ -41,8 +41,14 @@ class ShaftController:
 
 
 	#add methods to add e remove stress
-	def AddStressToModel(self, stress, x, l, b):
-		self.model.AddStress(x, l, b, stress)
+	def AddStressToModel(self, stress, variables):
+		if stress == 'stop ring':
+			for section in self.model.sections:
+				if section[1][0] >= variables[0]:
+					variables.append(section[0][1]*2)
+				else:
+					variables.append(0)
+		self.model.AddStress(stress, variables)
 
 	def RemoveStress(self, i):
 		for stress in self.model.stress:
@@ -58,9 +64,13 @@ class ShaftController:
 			for section in self.model.sections:
 				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(((section[0][1])*2, (section[1][0]-section[0][0]))))
 
+
+	def UpdateStressTreeview(self):
+		for i in self.view.tree_stress.get_children():
+			self.view.tree_stress.delete(i)
 		if self.model.stress != []:
 			for stress in self.model.stress:
-				self.view.tree_sections.insert('', tk.END, text='Chaveta x: %s mm'%(stress[0]))
+				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[0], stress[1][0]))
 				
 
 	#add force to model
@@ -71,8 +81,8 @@ class ShaftController:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 
 	#remove force
-	def RemoveForce(self, i):
-		self.model.RemoveForce(i)
+	def RemoveForce(self, i, plane_xy):
+		self.model.RemoveForce(i, plane_xy)
 
 	#modify the distance x of the support i
 	def ModifySupport(self, x, i):
@@ -87,9 +97,11 @@ class ShaftController:
 		for i in self.view.tree_forces.get_children():
 			self.view.tree_forces.delete(i)
 		#put the forces info in treeview
-		if self.model.forces != []:
-			for force in self.model.forces:
-				self.view.tree_forces.insert('', tk.END, text='F: %s N'%(force[4]))
+		if self.model.forces_xy != [] and self.model.forces_xz != []:
+			for force in self.model.forces_xy:
+				self.view.tree_forces.insert('', tk.END, text='F(XY): %s N'%(force[2]))
+			for force in self.model.forces_xz:
+				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s N'%(force[2]))
 
 	#{{{update canvas_long and canvas_axial
 	def UpdateCanvas(self):
@@ -124,45 +136,147 @@ class ShaftController:
 					radius = section[0][1]
 					self.view.canvas_axial.create_oval((int(125-radius*fator), int(125-radius*fator)),(int(125+radius*fator),int(125+radius*fator)), outline='black', width=2)
 
+			#draws each type of stress concentration on canvas
+			if self.model.stress != []:
+				for stress in self.model.stress:
+					if stress[0] == 'flat key':
+						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[1][0]*fator , 125, stress[1][1]*fator, stress[1][2]*fator)
+					if stress[0] == 'stop ring':
+						drawStopRing(self.view.canvas_long, (210-(Ltotal/2))+stress[1][0]*fator, 125, stress[1][3]*fator, stress[1][1]*fator, stress[1][2]*fator)
+
 			#draw arrows for each force in the model
-			for force in self.model.forces:
-				if force[3]:
-					drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[4] > 0 else False)
-				elif not force[3]:
-					if force[2]:
-						drawArrowH(self.view.canvas_axial, 125, 125-float(force[1])*fator, True if force[4] > 0 else False)
-					elif not force[2]:
-						drawArrowH(self.view.canvas_axial, 125+float(force[1])*fator, 125, True if force [4] > 0 else False)
+			for force in self.model.forces_xy:
+				drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
+			for force in self.model.forces_xz:
+				if force[1] != 0:
+					drawArrowH(self.view.canvas_axial, 125, 125-float(force[1])*fator, True if force[2] > 0 else False)
+				elif force[1] == 0:
+					drawArrowH(self.view.canvas_axial, 125+float(force[1])*fator, 125, True if force [2] > 0 else False)
 
 			for support in self.model.supports:
 				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
-
-			if self.model.stress != []:
-				for stress in self.model.stress:
-					if stress[3] == 'flat key':
-						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator , 125, stress[1]*fator, stress[2]*fator)
 	#}}}
 
-	def CalculateDminVonMisses(self):
+
+	def CalculateShaft(self):
 		Shaft.Reactions(self.model)
 		Shaft.Bending_Moment(self.model)
-		x = []
+		#x = []
+		#mom = []
+		#for f in self.model.forces:
+		#	if x != []:
+		#		if f[0] == x[-1]:
+		#			continue
+		#		else:
+		#			x.append(f[0])
+		#	else:
+		#		x.append(f[0])
+		#		self.model.mtot.insert(0, f[0])
 
-		for f in self.model.forces:
-			if x != []:
-				if f[0] == x[-1]:
-					continue
-				else:
-					x.append(f[0])
-			else:
-				x.append(f[0])
-				self.model.mtot.insert(0, f[0])
+		#self.model.mtot.append(0)
 
-		self.model.mtot.append(0)
+		#self.model.moments_xy.insert(0, [0,0])
 
-		fig, ax = plt.subplots()
-		ax.plot(x, self.model.mtot)
-		plt.show()
+		#drawPlot(self.view.canvas_plots, self.model.moments_xy, 200, 200)
+
+		#for m in self.model.moments_xy:
+		#	x.append(m[0])
+		#	mom.append(m[1])
+
+		#fig, ax = plt.subplots()
+		#ax.plot(x, mom)
+		#plt.show()
+
+	#PlotInCanvas{{{
+	def PlotInCanvas(self, plot):
+		self.view.canvas_plots.delete('all')
+
+		if plot == 'F(XY)':
+			points = [[0,0]]
+			points_to_add = []
+
+			for force in self.model.forces_xy:
+				points.append([force[0], force[2]])
+
+			for i in range(len(points)-1):
+				points[i+1][1] = points[i+1][1] + points[i][1]
+
+			for i in range(len(points)-1):
+				if points[i][0] != points[i+1][0]:
+					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
+
+			points_to_add.sort(reverse=True)
+
+			for p in points_to_add:
+				points.insert(p[0], p[1])
+
+			drawPlot(self.view.canvas_plots, points, 200, 200)
+
+		if plot == 'F(XZ)':
+			points = [[0,0]]
+			points_to_add = []
+
+			for force in self.model.forces_xz:
+				points.append([force[0], force[2]])
+
+			for i in range(len(points)-1):
+				points[i+1][1] = points[i+1][1] + points[i][1]
+
+			for i in range(len(points)-1):
+				if points[i][0] != points[i+1][0]:
+					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
+
+			points_to_add.sort(reverse=True)
+
+			for p in points_to_add:
+				points.insert(p[0], p[1])
+
+			drawPlot(self.view.canvas_plots, points, 200, 200)
+
+		if plot == 'F(TOT)':
+			print('ftot')
+
+		if plot == 'M(XY)':
+			if self.model.moments_xy[0][1] != 0:
+				self.model.moments_xy.insert(0, [0,0])
+			drawPlot(self.view.canvas_plots, self.model.moments_xy, 200, 200)
+
+		if plot == 'M(XZ)':
+			if self.model.moments_xz[0][1] != 0:
+				self.model.moments_xz.insert(0, [0,0])
+			drawPlot(self.view.canvas_plots, self.model.moments_xz, 200, 200)
+
+		if plot == 'M(TOT)':
+			print('mtot...')
+
+		if plot == 'Torque':
+			points = [[0,0]]
+			points_to_add = []
+
+			for f in self.model.forces_xy:
+				if f[1] != 0:
+					points.append([f[0], f[1]*f[2]])
+
+			for f in self.model.forces_xz:
+				if f[1] != 0:
+					points.append([f[0], f[1]*f[2]])
+
+			points.sort()
+
+			for i in range(len(points)-1):
+				points[i+1][1] = points[i+1][1] + points[i][1]
+
+			for i in range(len(points)-1):
+				if points[i][0] != points[i+1][0]:
+					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
+
+			points_to_add.sort(reverse=True)
+
+			for p in points_to_add:
+				points.insert(p[0], p[1])
+
+			drawPlot(self.view.canvas_plots, points, 200, 200)
+	#}}}
 #}}}
 
 #Function drawArrowV{{{
@@ -207,4 +321,42 @@ def drawStopRing(canvas, x, y, D, d, s):
 	canvas.create_rectangle((x, y-(d/2)),(x+s, y+(d/2)), outline='black', fill='white', width=2)
 	canvas.create_line((x, y-(D/2)),(x, y+(D/2)), fill='black', width=2)
 	canvas.create_line((x+s, y-(D/2)),(x+s, y+(D/2)), fill='black', width=2)
+#}}}
+
+#Function drawPlot{{{
+def drawPlot(canvas, points, x, y):
+	#480x250
+	print(points)
+
+	p_max = 1
+	p_min = 0
+
+	for point in points:
+		if p_max < point[1]:
+			p_max = point[1]
+		if p_min > point[1]:
+			p_min = point[1]
+
+	x_scale = 300/points[-1][0]
+	y_scale = 180/(p_max - p_min)
+
+	canvas.create_line((x, y), (x+310, y), width=3, fill='black')
+	canvas.create_line((x, y), (x, y-180), width=3, fill='black')
+	canvas.create_polygon((x+310,y),(x+302, y-8),(x+302, y+8), fill='black')
+	canvas.create_polygon((x,y-180),(x+8, y-172),(x-8, y-172), fill='black')
+
+	for i in range(len(points)-1):
+		#linhas do gráfico
+		canvas.create_line((x+(points[i][0])*x_scale, y-(points[i][1]*y_scale)),(x+(points[i+1][0]*x_scale), y-(points[i+1][1]*y_scale)), width=3, fill='blue')
+
+		#linhas de pontos
+		canvas.create_line((x+ (points[i][0]*x_scale), y+5), (x+(points[i][0]*x_scale), y-5), width=3, fill='black')
+		canvas.create_text((x+(points[i][0]*x_scale), y+10),text=points[i][0], fill='black')
+
+		if points[i+1][1] != points[i][1]:
+			canvas.create_line((x+5, y-(points[i][1]*y_scale)), (x-5, y-(points[i][1]*y_scale)), width=3, fill='black')
+			canvas.create_text((x-35, y-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]), fill='black')
+		
+
+
 #}}}
