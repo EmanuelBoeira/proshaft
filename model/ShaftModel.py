@@ -2,19 +2,17 @@
 #Class Shaft {{{
 #class for a shaft object.
 class Shaft: 
-	sections = [] #sections, [raio, comprimento]
-	supports = [] #distance x of the 2 supports
-	forces_xy = []   #forces in the shaft
-	forces_xz = []   #forces in the shaft
-	moments_xy = []     #points of total moment to make the grafic
-	moments_xz = []     #points of total moment to make the grafic
-	stress = []   #list of stress concentrations in the shaft [type, x, l]
+	sections = []    #sections, [[x1,y1], [x2,y2]]
+	supports = []    #distance x of the 2 supports
+	forces_xy = []   #forces in the shaft in plane xy [x, y, F]
+	forces_xz = []   #forces in the shaft in plane xz [x, y, F]
+	moments_xy = []  #moments in plane xy [x,m]
+	moments_xz = []  #moments in plane xz [x,m]
+	stress = []      #list of stress concentrations in the shaft [x, type, [variables]]
 
 	#constructor of the class shaft.
 	def __init__(self):
 		self.supports = [0,0]
-		#self.forces_xy.append([0, 0, 0])
-		#self.forces_xz.append([0, 0, 0])
 
 	#method to add a section to the list sections
 	def AddSection(self, x1, y1, x2, y2):
@@ -23,7 +21,19 @@ class Shaft:
 
     #method to remove a section from the list sections.
 	def RemoveSection(self, i):
+		for f in self.forces_xy:
+			if f[0] > self.sections[i][1][0]:
+				self.forces_xy.remove(f)
+
+		for f in self.forces_xz:
+			if f[0] > self.sections[i][1][0]:
+				self.forces_xz.remove(f)
+
 		self.sections.remove(self.sections[i])
+
+		for s in self.stress:
+			if s[0] > self.sections[i][1][0]:
+				self.stress.remove(s)
 
     #method to add a position of a support in the list supports.
 	def AddSupport(self, x, i):
@@ -182,20 +192,39 @@ def kb(d):
 		return 0
 #}}}
 
-#Function dmin_VonMisses{{{
-#function to calculate minimum diamiter by Von Misses.
-def dmin_VonMisses(nf, Kf, Kfs, Ma, Tm, Se, Sy):
-	return ((16*nf/3.1415)*(((4*((Kf*Ma/Se)**2))+(3*((Kfs*Tm/Sy)**2)))**(0.5)))**(1/3)
+#Function Kf{{{
+def Kf(stress, val, q):
+	#list of stresses. [stress, Kt, Kts, value for selection]
+	stress_list = [['diameter', 2.7, 2.2, 0.02], ['diameter', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+
+	for s in stress_list:
+		if s == stress:
+			return 1+(q*(s[1]-1))
+			break
+	
+	return 0
 #}}}
 
-#exemplo:
-#shaft1 = Shaft()
-#shaft1.AddSection(0,10,250,10)
-#shaft1.AddSection(250,20,260,20)
-#shaft1.AddForce(50, 10, 'r', 'xy', -876)
-#shaft1.AddForce(50, 10, 'r', 'xz', 2400)
-#shaft1.AddForce(195, 10, 'r', 'xy', -3937)
-#shaft1.AddForce(195, 10, 'r', 'xz', -10814)
-#shaft1.AddSupport(0)
-#shaft1.AddSupport(250)
+#Function Kfs{{{
+def Kf(stress, val, q):
+	#list of stresses. [stress, Kt, Kts, value for selection]
+	stress_list = [['diameter', 2.7, 2.2, 0.02], ['diameter', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+
+	for s in stress_list:
+		if s == stress:
+			return 1+(q*(s[2]-1))
+			break
+	
+	return 0
+#}}}
+
+#Function q{{{
+def q(t, r, Sut):
+	if t == 'torsion':
+		return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+	elif t == 'bending':
+		return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+	else:
+		return 0
+#}}}
 
