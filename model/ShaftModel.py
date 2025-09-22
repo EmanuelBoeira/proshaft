@@ -15,11 +15,14 @@ class Shaft:
 		self.supports = [0,0]
 
 	#method to add a section to the list sections
+	#AddSection{{{
 	def AddSection(self, x1, y1, x2, y2):
 		self.sections.append([[x1,y1],[x2,y2]])
 		self.sections.sort()
+	#}}}
 
     #method to remove a section from the list sections.
+	#RemovaSection{{{
 	def RemoveSection(self, i):
 		for f in self.forces_xy:
 			if f[0] > self.sections[i][1][0]:
@@ -34,16 +37,16 @@ class Shaft:
 		for s in self.stress:
 			if s[0] > self.sections[i][1][0]:
 				self.stress.remove(s)
+	#}}}
 
     #method to add a position of a support in the list supports.
+	#AddSupport{{{
 	def AddSupport(self, x, i):
 		self.supports[i] = x
-
-    #method to remove support from the list supports.
-	def RemoveSupport(self, i):
-		self.supports.remove(self.supports[i])
+	#}}}
 
     #method to add a force to list forces. x is the x coordenate, y_or_z is the y or z coordenate, tangential is bool value (True if is tangential), plane_xy is a bool value (True if is in xy) and F is the magnitude.
+	#AddForce{{{
 	def AddForce(self, x, y_or_z, tangential, plane_xy, F):
 		if tangential:
 			if plane_xy:
@@ -59,26 +62,35 @@ class Shaft:
 
 		self.forces_xy.sort()
 		self.forces_xz.sort()
+	#}}}
 
     #method to remove a force from the list forces.
+	#RemoveForce{{{
 	def RemoveForce(self, i, plane_xy):
 		if plane_xy:
 			self.forces_xy.remove(self.forces_xy[i])
 		else:
 			self.forces_xz.remove(self.forces_xz[i])
+	#}}}
 
+	#AddStress{{{
 	def AddStress(self, stress, variables):
 		self.stress.append([stress, variables])
 		self.stress.sort()
+	#}}}
 
+	#RemoveStress{{{
 	def RemoveStress(self, i):
 		self.stress.remove(self.stress[i])
+	#}}}
 
+	#AddMoment{{{
 	def AddMoment(self, x, m, plane_xy):
 		if plane_xy:
 			self.moments_xy.append([x, m])
 		else:
 			self.moments_xz.append([x, m])
+	#}}}
 #}}}
 
 #Function Reaction {{{

@@ -30,6 +30,8 @@ shaft.AddForce(215, 33.5, True, True, -10814)
 shaft.AddSupport(20,0)
 shaft.AddSupport(270,1)
 
+print(shaft.forces_xz)
+
 control = ShaftControl.ShaftController(shaft, main_win)
 
 #teste

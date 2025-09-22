@@ -16,7 +16,8 @@ import ShaftMainWin as MainWin
 
 #Class ShaftController{{{
 class ShaftController:
-	#init the class
+	#init
+	#init the class{{{
 	def __init__(self, model, view):
 		self.model = model
 		self.view = view
@@ -25,22 +26,27 @@ class ShaftController:
 		#if (self.model.sections == []):
 			#self.view.buttonDelSection.state(['disabled'])
 			#self.view.buttonCalc.state(['disabled'])
+	#}}}
 
 	#add a section to the model shaft
+	#AddSectionToModel{{{
 	def AddSectionToModel(self, x1, y1, x2, y2):
 		if self.model.sections == []:
 			self.model.AddSection(x1, y1, x2, y2)
 		else:
 			x = float(self.model.sections[-1][1][0])
 			self.model.AddSection(x, y1, (x+x2), y2)
+	#}}}
 
 	#remove section
+	#RemoveSection{{{
 	def RemoveSection(self, i):
 		for x in range(len(self.model.sections)-i):
 			self.model.RemoveSection(i)
-
+	#}}}
 
 	#add methods to add e remove stress
+	#AddStressToModel{{{
 	def AddStressToModel(self, stress, variables):
 		if stress == 'stop ring':
 			for section in self.model.sections:
@@ -49,12 +55,17 @@ class ShaftController:
 				else:
 					variables.append(0)
 		self.model.AddStress(stress, variables)
+	#}}}
 
+	#remove stress from the model
+	#RemoveStress{{{
 	def RemoveStress(self, i):
 		for stress in self.model.stress:
 			self.model.RemoveStress(i)
+	#}}}
 
 	#update the informations of sections treeview
+	#UpdateSectionTreeview{{{
 	def UpdateSectionTreeview(self):
 		#clean treeview
 		for i in self.view.tree_sections.get_children():
@@ -63,35 +74,20 @@ class ShaftController:
 		if self.model.sections != []:
 			for section in self.model.sections:
 				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(((section[0][1])*2, (section[1][0]-section[0][0]))))
+	#}}}
 
-
+	#update the informations of stress treeview
+	#UpdateStressTreeview{{{
 	def UpdateStressTreeview(self):
 		for i in self.view.tree_stress.get_children():
 			self.view.tree_stress.delete(i)
 		if self.model.stress != []:
 			for stress in self.model.stress:
 				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[0], stress[1][0]))
-				
-
-	#add force to model
-	def AddForceToModel(self, x, y, tangential, plane_xy, F):
-		if self.model.sections[-1][1][0] > x:
-			self.model.AddForce(x, y, tangential, plane_xy, F)
-		else:
-			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
-
-	#remove force
-	def RemoveForce(self, i, plane_xy):
-		self.model.RemoveForce(i, plane_xy)
-
-	#modify the distance x of the support i
-	def ModifySupport(self, x, i):
-		if self.model.sections[-1][1][0] > x:
-			self.model.AddSupport(x, i)
-		else:
-			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
+	#}}}
 
 	#update the info of treeview forces
+	#UpdateForceTreeview{{{
 	def UpdateForceTreeview(self):
 		#clean treeview
 		for i in self.view.tree_forces.get_children():
@@ -102,7 +98,33 @@ class ShaftController:
 				self.view.tree_forces.insert('', tk.END, text='F(XY): %s N'%(force[2]))
 			for force in self.model.forces_xz:
 				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s N'%(force[2]))
+	#}}}
 
+	#add force to model
+	#AddForceToModel{{{
+	def AddForceToModel(self, x, y, tangential, plane_xy, F):
+		if self.model.sections[-1][1][0] > x:
+			self.model.AddForce(x, y, tangential, plane_xy, F)
+		else:
+			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
+	#}}}
+
+	#remove force from model
+	#RemoveForce{{{
+	def RemoveForce(self, i, plane_xy):
+		self.model.RemoveForce(i, plane_xy)
+	#}}}
+
+	#modify the distance x of the support i
+	#ModeifySupport{{{
+	def ModifySupport(self, x, i):
+		if self.model.sections[-1][1][0] > x:
+			self.model.AddSupport(x, i)
+		else:
+			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
+	#}}}
+
+	#update long and axal canvas
 	#{{{update canvas_long and canvas_axial
 	def UpdateCanvas(self):
 		#clean canvas
@@ -123,7 +145,17 @@ class ShaftController:
 					if (200/int(section[0][1]*2)) < fator:
 						fator = 220/int(section[0][1]*2)
 
-			#comprimento total em x ao somar todas as seções
+			for f in self.model.forces_xy:
+				if int(f[1]*2) > 200:
+					if int(200/(f[1]*2)) < fator:
+						fator = 200/(f[1]*2)
+
+			for f in self.model.forces_xz:
+				if int(f[1]*2) > 200:
+					if int(200/(f[1]*2)) < fator:
+						fator = 200/(f[1]*2)
+
+			#total length of shaft in x
 			Ltotal = int(self.model.sections[-1][1][0]*fator)
 
 			#draw the section os the shaft.
@@ -131,7 +163,7 @@ class ShaftController:
 				self.view.canvas_long.create_rectangle((int((210-(Ltotal/2))+(section[0][0]*fator)), int((125-(section[0][1]*fator)))), (int((210-(Ltotal/2))+(section[1][0]*fator)), int((125+(section[1][1]*fator)))), outline='black', width=2)
 
 				radius = 0
-
+				
 				if section[0][1] > radius:
 					radius = section[0][1]
 					self.view.canvas_axial.create_oval((int(125-radius*fator), int(125-radius*fator)),(int(125+radius*fator),int(125+radius*fator)), outline='black', width=2)
@@ -146,18 +178,23 @@ class ShaftController:
 
 			#draw arrows for each force in the model
 			for force in self.model.forces_xy:
-				drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
+				if force[1] != 0:
+					drawArrowH(self.view.canvas_axial, 125, 125-float(force[1])*fator, True if force[2] > 0 else False)
+				elif force[1] == 0:
+					drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
+
 			for force in self.model.forces_xz:
 				if force[1] != 0:
 					drawArrowH(self.view.canvas_axial, 125, 125-float(force[1])*fator, True if force[2] > 0 else False)
 				elif force[1] == 0:
-					drawArrowH(self.view.canvas_axial, 125+float(force[1])*fator, 125, True if force [2] > 0 else False)
+					drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
 
 			for support in self.model.supports:
 				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
 	#}}}
 
-
+	#calculate reactions em bending moments
+	#CalculateShaft{{{
 	def CalculateShaft(self):
 		Shaft.Reactions(self.model)
 		Shaft.Bending_Moment(self.model)
@@ -186,7 +223,9 @@ class ShaftController:
 		#fig, ax = plt.subplots()
 		#ax.plot(x, mom)
 		#plt.show()
+	#}}}
 
+	#plot math data in canvas from the last frame
 	#PlotInCanvas{{{
 	def PlotInCanvas(self, plot):
 		self.view.canvas_plots.delete('all')
@@ -210,7 +249,7 @@ class ShaftController:
 			for p in points_to_add:
 				points.insert(p[0], p[1])
 
-			drawPlot(self.view.canvas_plots, points, 200, 200)
+			drawPlot(self.view.canvas_plots, points, 100, 250)
 
 		if plot == 'F(XZ)':
 			points = [[0,0]]
@@ -231,7 +270,7 @@ class ShaftController:
 			for p in points_to_add:
 				points.insert(p[0], p[1])
 
-			drawPlot(self.view.canvas_plots, points, 200, 200)
+			drawPlot(self.view.canvas_plots, points, 100, 250)
 
 		if plot == 'F(TOT)':
 			print('ftot')
@@ -239,12 +278,12 @@ class ShaftController:
 		if plot == 'M(XY)':
 			if self.model.moments_xy[0][1] != 0:
 				self.model.moments_xy.insert(0, [0,0])
-			drawPlot(self.view.canvas_plots, self.model.moments_xy, 200, 200)
+			drawPlot(self.view.canvas_plots, self.model.moments_xy, 100, 250)
 
 		if plot == 'M(XZ)':
 			if self.model.moments_xz[0][1] != 0:
 				self.model.moments_xz.insert(0, [0,0])
-			drawPlot(self.view.canvas_plots, self.model.moments_xz, 200, 200)
+			drawPlot(self.view.canvas_plots, self.model.moments_xz, 100, 250)
 
 		if plot == 'M(TOT)':
 			print('mtot...')
@@ -275,7 +314,7 @@ class ShaftController:
 			for p in points_to_add:
 				points.insert(p[0], p[1])
 
-			drawPlot(self.view.canvas_plots, points, 200, 200)
+			drawPlot(self.view.canvas_plots, points, 100, 250)
 	#}}}
 #}}}
 
@@ -325,7 +364,7 @@ def drawStopRing(canvas, x, y, D, d, s):
 
 #Function drawPlot{{{
 def drawPlot(canvas, points, x, y):
-	#480x250
+	#540x290
 	print(points)
 
 	p_max = 1
@@ -338,24 +377,24 @@ def drawPlot(canvas, points, x, y):
 			p_min = point[1]
 
 	x_scale = 300/points[-1][0]
-	y_scale = 180/(p_max - p_min)
+	y_scale = 200/(p_max - p_min)
 
-	canvas.create_line((x, y), (x+310, y), width=3, fill='black')
-	canvas.create_line((x, y), (x, y-180), width=3, fill='black')
-	canvas.create_polygon((x+310,y),(x+302, y-8),(x+302, y+8), fill='black')
-	canvas.create_polygon((x,y-180),(x+8, y-172),(x-8, y-172), fill='black')
+	canvas.create_line((x, y+(p_min*y_scale)), (x+350, y+(p_min*y_scale)), width=3, fill='black')
+	canvas.create_line((x, y), (x, y-205), width=3, fill='black')
+	canvas.create_polygon((x+355,y+(p_min*y_scale)),(x+345, y+(p_min*y_scale)-8),(x+345, y+(p_min*y_scale)+8), fill='black')
+	canvas.create_polygon((x,y-215),(x+8, y-205),(x-8, y-205), fill='black')
 
 	for i in range(len(points)-1):
 		#linhas do gráfico
-		canvas.create_line((x+(points[i][0])*x_scale, y-(points[i][1]*y_scale)),(x+(points[i+1][0]*x_scale), y-(points[i+1][1]*y_scale)), width=3, fill='blue')
+		canvas.create_line((x+(points[i][0])*x_scale, y+(p_min*y_scale)-(points[i][1]*y_scale)),(x+(points[i+1][0]*x_scale), y+(p_min*y_scale)-(points[i+1][1]*y_scale)), width=3, fill='blue')
 
 		#linhas de pontos
-		canvas.create_line((x+ (points[i][0]*x_scale), y+5), (x+(points[i][0]*x_scale), y-5), width=3, fill='black')
-		canvas.create_text((x+(points[i][0]*x_scale), y+10),text=points[i][0], fill='black')
+		canvas.create_line((x+ (points[i][0]*x_scale), y+(p_min*y_scale)+5), (x+(points[i][0]*x_scale), y+(p_min*y_scale)-5), width=3, fill='black')
+		canvas.create_text((x+(points[i][0]*x_scale), y+(p_min*y_scale)+10),text=points[i][0], fill='black')
 
 		if points[i+1][1] != points[i][1]:
-			canvas.create_line((x+5, y-(points[i][1]*y_scale)), (x-5, y-(points[i][1]*y_scale)), width=3, fill='black')
-			canvas.create_text((x-35, y-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]), fill='black')
+			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=3, fill='black')
+			canvas.create_text((x-35, y+(p_min*y_scale)-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]), fill='black')
 		
 
 
