@@ -394,7 +394,7 @@ def drawPlot(canvas, points, x, y):
 
 		if points[i+1][1] != points[i][1]:
 			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=3, fill='black')
-			canvas.create_text((x-35, y+(p_min*y_scale)-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]), fill='black')
+			canvas.create_text((x-35, y+(p_min*y_scale)-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]/1000), fill='black')
 		
 
 
