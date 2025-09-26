@@ -22,7 +22,7 @@ class Shaft:
 	#}}}
 
     #method to remove a section from the list sections.
-	#RemovaSection{{{
+	#RemoveSection{{{
 	def RemoveSection(self, i):
 		for f in self.forces_xy:
 			if f[0] > self.sections[i][1][0]:
@@ -32,11 +32,12 @@ class Shaft:
 			if f[0] > self.sections[i][1][0]:
 				self.forces_xz.remove(f)
 
-		self.sections.remove(self.sections[i])
-
 		for s in self.stress:
 			if s[0] > self.sections[i][1][0]:
 				self.stress.remove(s)
+
+		self.supports[1] = self.sections[i][0][0]
+		self.sections.remove(self.sections[i])
 	#}}}
 
     #method to add a position of a support in the list supports.

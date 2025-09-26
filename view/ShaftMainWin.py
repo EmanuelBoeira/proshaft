@@ -141,7 +141,7 @@ class ShaftMainWindow:
 
 	def RemoveSection(self):
 		s = self.tree_sections.focus()
-		self.controller.RemoveSection(self.tree_sections.index(s), True)
+		self.controller.RemoveSection(self.tree_sections.index(s))
 
 	def RemoveStress(self):
 		s = self.tree_stress.focus()

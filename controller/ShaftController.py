@@ -111,8 +111,11 @@ class ShaftController:
 
 	#remove force from model
 	#RemoveForce{{{
-	def RemoveForce(self, i, plane_xy):
-		self.model.RemoveForce(i, plane_xy)
+	def RemoveForce(self, i):
+		if i >= len(self.model.forces_xy):
+			self.model.RemoveForce(i-len(self.model.forces_xy), False)
+		else:
+			self.model.RemoveForce(i, True)
 	#}}}
 
 	#modify the distance x of the support i
