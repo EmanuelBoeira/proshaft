@@ -11,11 +11,15 @@ from tkinter.messagebox import showwarning
 #import numpy as np
 
 import ShaftModel as Shaft
+import ShaftProjectModel as ShaftProject
 import ShaftMainWin as MainWin
 #}}}
 
 #Class ShaftController{{{
 class ShaftController:
+	
+	shaft_project = None
+
 	#init
 	#init the class{{{
 	def __init__(self, model, view):
@@ -93,9 +97,10 @@ class ShaftController:
 		for i in self.view.tree_forces.get_children():
 			self.view.tree_forces.delete(i)
 		#put the forces info in treeview
-		if self.model.forces_xy != [] and self.model.forces_xz != []:
+		if self.model.forces_xy != []:
 			for force in self.model.forces_xy:
 				self.view.tree_forces.insert('', tk.END, text='F(XY): %s N'%(force[2]))
+		if self.model.forces_xz != []:
 			for force in self.model.forces_xz:
 				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s N'%(force[2]))
 	#}}}
@@ -199,33 +204,12 @@ class ShaftController:
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
 	def CalculateShaft(self):
-		Shaft.Reactions(self.model)
-		Shaft.Bending_Moment(self.model)
-		#x = []
-		#mom = []
-		#for f in self.model.forces:
-		#	if x != []:
-		#		if f[0] == x[-1]:
-		#			continue
-		#		else:
-		#			x.append(f[0])
-		#	else:
-		#		x.append(f[0])
-		#		self.model.mtot.insert(0, f[0])
+		self.shaft_project = ShaftProject.ShaftProject(self.model)
+	#}}}
 
-		#self.model.mtot.append(0)
-
-		#self.model.moments_xy.insert(0, [0,0])
-
-		#drawPlot(self.view.canvas_plots, self.model.moments_xy, 200, 200)
-
-		#for m in self.model.moments_xy:
-		#	x.append(m[0])
-		#	mom.append(m[1])
-
-		#fig, ax = plt.subplots()
-		#ax.plot(x, mom)
-		#plt.show()
+	#clean the values calculated in project{{{
+	def CleanCalc(self):
+		self.shaft_project.Clean()
 	#}}}
 
 	#plot math data in canvas from the last frame
@@ -234,90 +218,25 @@ class ShaftController:
 		self.view.canvas_plots.delete('all')
 
 		if plot == 'F(XY)':
-			points = [[0,0]]
-			points_to_add = []
-
-			for force in self.model.forces_xy:
-				points.append([force[0], force[2]])
-
-			for i in range(len(points)-1):
-				points[i+1][1] = points[i+1][1] + points[i][1]
-
-			for i in range(len(points)-1):
-				if points[i][0] != points[i+1][0]:
-					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
-
-			points_to_add.sort(reverse=True)
-
-			for p in points_to_add:
-				points.insert(p[0], p[1])
-
-			drawPlot(self.view.canvas_plots, points, 100, 250)
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_f_xy, 100, 250, 'F(kN)')
 
 		if plot == 'F(XZ)':
-			points = [[0,0]]
-			points_to_add = []
-
-			for force in self.model.forces_xz:
-				points.append([force[0], force[2]])
-
-			for i in range(len(points)-1):
-				points[i+1][1] = points[i+1][1] + points[i][1]
-
-			for i in range(len(points)-1):
-				if points[i][0] != points[i+1][0]:
-					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
-
-			points_to_add.sort(reverse=True)
-
-			for p in points_to_add:
-				points.insert(p[0], p[1])
-
-			drawPlot(self.view.canvas_plots, points, 100, 250)
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_f_xz, 100, 250, 'F(kN)')
 
 		if plot == 'F(TOT)':
-			print('ftot')
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_f_tot, 100, 250, 'F(kN)')
 
 		if plot == 'M(XY)':
-			if self.model.moments_xy[0][1] != 0:
-				self.model.moments_xy.insert(0, [0,0])
-			drawPlot(self.view.canvas_plots, self.model.moments_xy, 100, 250)
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_m_xy, 100, 250, 'M(N.m)')
 
 		if plot == 'M(XZ)':
-			if self.model.moments_xz[0][1] != 0:
-				self.model.moments_xz.insert(0, [0,0])
-			drawPlot(self.view.canvas_plots, self.model.moments_xz, 100, 250)
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_m_xz, 100, 250, 'M(N.m)')
 
 		if plot == 'M(TOT)':
-			print('mtot...')
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_m_tot, 100, 250, 'M(N.m)')
 
 		if plot == 'Torque':
-			points = [[0,0]]
-			points_to_add = []
-
-			for f in self.model.forces_xy:
-				if f[1] != 0:
-					points.append([f[0], f[1]*f[2]])
-
-			for f in self.model.forces_xz:
-				if f[1] != 0:
-					points.append([f[0], f[1]*f[2]])
-
-			points.sort()
-
-			for i in range(len(points)-1):
-				points[i+1][1] = points[i+1][1] + points[i][1]
-
-			for i in range(len(points)-1):
-				if points[i][0] != points[i+1][0]:
-					points_to_add.append([i+1, [points[i+1][0], points[i][1]]])
-
-			points_to_add.sort(reverse=True)
-
-			for p in points_to_add:
-				points.insert(p[0], p[1])
-
-			drawPlot(self.view.canvas_plots, points, 100, 250)
+			drawPlot(self.view.canvas_plots, self.shaft_project.plot_t, 100, 250, 'T(N.m)')
 	#}}}
 #}}}
 
@@ -366,7 +285,7 @@ def drawStopRing(canvas, x, y, D, d, s):
 #}}}
 
 #Function drawPlot{{{
-def drawPlot(canvas, points, x, y):
+def drawPlot(canvas, points, x, y, t):
 	#540x290
 	print(points)
 
@@ -386,6 +305,9 @@ def drawPlot(canvas, points, x, y):
 	canvas.create_line((x, y), (x, y-205), width=3, fill='black')
 	canvas.create_polygon((x+355,y+(p_min*y_scale)),(x+345, y+(p_min*y_scale)-8),(x+345, y+(p_min*y_scale)+8), fill='black')
 	canvas.create_polygon((x,y-215),(x+8, y-205),(x-8, y-205), fill='black')
+	canvas.create_text(x+380, y+5+(p_min*y_scale), text='x(mm)', fill='black')
+	canvas.create_text(x, y-230, text=t, fill='black')
+
 
 	for i in range(len(points)-1):
 		#linhas do gráfico
@@ -393,7 +315,7 @@ def drawPlot(canvas, points, x, y):
 
 		#linhas de pontos
 		canvas.create_line((x+ (points[i][0]*x_scale), y+(p_min*y_scale)+5), (x+(points[i][0]*x_scale), y+(p_min*y_scale)-5), width=3, fill='black')
-		canvas.create_text((x+(points[i][0]*x_scale), y+(p_min*y_scale)+10),text=points[i][0], fill='black')
+		canvas.create_text((x+(points[i][0]*x_scale), y+(p_min*y_scale)+15),text=points[i][0], fill='black')
 
 		if points[i+1][1] != points[i][1]:
 			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=3, fill='black')

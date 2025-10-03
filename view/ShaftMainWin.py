@@ -124,6 +124,7 @@ class ShaftMainWindow:
 				self.frame_draw.place(x=10, y=270)
 				self.frame_calc.place_forget()
 			elif(self.frame_plots.winfo_ismapped()):
+				self.controller.CleanCalc()
 				self.frame_calc.place(x=10, y=270)
 				self.frame_plots.place_forget()
 
