@@ -1,16 +1,22 @@
 #class for Shaft Project{{{
 class ShaftProject:
-	plot_f_xy  =  [[0,0]]
-	plot_f_xz  =  [[0,0]]
+	plot_f_xy  =  []
+	plot_f_xz  =  []
 	plot_f_tot =  []
-	plot_m_xy  =  [[0,0]]
-	plot_m_xz  =  [[0,0]]
+	plot_m_xy  =  []
+	plot_m_xz  =  []
 	plot_m_tot =  []
-	plot_t     =  [[0,0]]
+	plot_t     =  []
 	material   =  ''
 
 	#init{{{
 	def __init__(self, shaft):
+		self.plot_f_xy.append([0,0])
+		self.plot_f_xz.append([0,0])
+		self.plot_m_xy.append([0,0])
+		self.plot_m_xz.append([0,0])
+		self.plot_t.append([0,0])
+
 		#add forces and torque from the shaft
 		for f in shaft.forces_xy:
 			self.plot_f_xy.append([f[0], f[2]])
@@ -119,11 +125,11 @@ class ShaftProject:
 			self.plot_m_xz[i+1][1] = self.plot_m_xz[i][1] + self.plot_m_xz[i+1][1]
 		#}}}
 
-		#adicionar Ftot aqui
+		#Calculate Ftot
 		for i in range(len(self.plot_f_xy)):
 			self.plot_f_tot.append([self.plot_f_xy[i][0], ((self.plot_f_xy[i][1]**2)+(self.plot_f_xz[i][1]**2))**0.5])
 			
-		#adicionar Mtot aqui
+		#calculate Mtot
 		for i in range(len(self.plot_m_xy)):
 			self.plot_m_tot.append([self.plot_m_xy[i][0], ((self.plot_m_xy[i][1]**2)+(self.plot_m_xz[i][1]**2))**0.5])
 			
@@ -131,14 +137,14 @@ class ShaftProject:
 
 	#clean the values{{{
 	def Clean(self):
-		plot_f_xy  =  [[0,0]]
-		plot_f_xz  =  [[0,0]]
-		plot_f_tot =  [[0,0]]
-		plot_m_xy  =  [[0,0]]
-		plot_m_xz  =  [[0,0]]
-		plot_m_tot =  [[0,0]]
-		plot_t     =  [[0,0]]
-		material   =  ''
+		self.plot_f_xy.clear()
+		self.plot_f_xz.clear()
+		self.plot_f_tot.clear()
+		self.plot_m_xy.clear()
+		self.plot_m_xz.clear()
+		self.plot_m_tot.clear()
+		self.plot_t.clear()
+		self.material   =  ''
 	#}}}
 
 
