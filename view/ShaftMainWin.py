@@ -75,6 +75,15 @@ class ShaftMainWindow:
 		treeviewScroll2 = tk.Scrollbar(self.tree_forces, orient=tk.VERTICAL)
 		treeviewScroll2.pack(side=tk.RIGHT, fill=tk.Y)
 
+		text_material = ttk.Label(self.frame_calc, text='Material:')
+		text_material.place(x=350, y=10)
+
+		material_list = ['Alumínio', 'Aço 1020']
+
+		self.material = tk.StringVar()
+		self.combo_box_materials = ttk.Combobox(self.frame_calc, textvariable=self.material, values = material_list, state = 'readonly')
+		self.combo_box_materials.place(x=350, y=40, width=310, height=30)
+
 		button_open_force_win = ttk.Button(self.frame_calc, text='Add force', command=self.OpenForceWin)
 		button_open_force_win.place(x=350, y=200, width=150, height=25)
 
@@ -116,7 +125,7 @@ class ShaftMainWindow:
 				self.frame_plots.place(x=10, y=270)
 				self.frame_calc.place_forget()
 				print('calculando...')
-				self.controller.CalculateShaft()
+				self.controller.CalculateShaft(self.material.get())
 			elif(self.frame_plots.winfo_ismapped()):
 				print('gerar pdf...')
 		else:

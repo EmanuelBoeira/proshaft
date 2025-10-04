@@ -147,7 +147,10 @@ class ShaftProject:
 		self.material   =  ''
 	#}}}
 
-
+	#SetMateril{{{
+	def SetMaterial(self, m):
+		self.material = m
+	#}}}
 #}}}
 
 #Function Se{{{
@@ -187,7 +190,7 @@ def Kf(stress, val, q):
 #}}}
 
 #Function Kfs{{{
-def Kf(stress, val, q):
+def Kfs(stress, val, q):
 	#list of stresses. [stress, Kt, Kts, value for selection]
 	stress_list = [['diameter', 2.7, 2.2, 0.02], ['diameter', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
 

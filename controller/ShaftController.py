@@ -203,8 +203,10 @@ class ShaftController:
 
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
-	def CalculateShaft(self):
+	def CalculateShaft(self, m):
 		self.shaft_project = ShaftProject.ShaftProject(self.model)
+		self.shaft_project.SetMaterial(m)
+		print(self.shaft_project.material)
 	#}}}
 
 	#clean the values calculated in project{{{
