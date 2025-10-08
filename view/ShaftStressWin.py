@@ -91,9 +91,9 @@ class ShaftStressWindow:
 
 	def AddStress(self):
 		if self.stress.get() == 'flat key':
-			self.controller.AddStressToModel(self.stress.get(), [float(self.x.get()), float(self.l.get()), float(self.b.get())])
+			self.controller.AddStressToModel(float(self.x.get()), self.stress.get(), [float(self.l.get()), float(self.b.get())])
 		elif self.stress.get() == 'stop ring':
-			self.controller.AddStressToModel(self.stress.get(), [float(self.x_stop_ring.get()), float(self.d_stop_ring.get()), float(self.s_stop_ring.get())])
+			self.controller.AddStressToModel(float(self.x_stop_ring.get()), self.stress.get(), [float(self.d_stop_ring.get()), float(self.s_stop_ring.get())])
 			
 		self.controller.UpdateCanvas()
 		self.controller.UpdateStressTreeview()

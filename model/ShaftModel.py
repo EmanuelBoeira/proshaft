@@ -82,6 +82,5 @@ class Shaft:
 	def RemoveStress(self, i):
 		self.stress.remove(self.stress[i])
 	#}}}
-
 #}}}
 

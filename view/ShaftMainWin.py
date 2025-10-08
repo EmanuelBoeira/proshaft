@@ -129,6 +129,7 @@ class ShaftMainWindow:
 			elif(self.frame_plots.winfo_ismapped()):
 				print('gerar pdf...')
 				self.controller.CalculateGoodman()
+				self.controller.CalculateASME()
 		else:
 			if(self.frame_calc.winfo_ismapped()):
 				self.frame_draw.place(x=10, y=270)

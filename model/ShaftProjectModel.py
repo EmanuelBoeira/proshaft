@@ -143,13 +143,13 @@ class ShaftProject:
 			
 		#adicionar pontos de interesse em stress_points
 		for s in shaft.stress:
-			self.stress_points.append([s[0], s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
+			self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
 
 		for i in range(len(shaft.sections)-1):
 			if shaft.sections[i][1][1] < shaft.sections[i+1][0][1]:
-				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(shaft.sections[i][1][1], self.material[1])), Kfs('diameter-0.02', q_torsion(shaft.sections[i][1][1], self.material[1]))])
+				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(self.material[1]/1000)), Kfs('diameter-0.02', q_torsion(self.material[1]/1000))])
 			else:
-				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(shaft.sections[i+1][0][1], self.material[1])), Kfs('diameter-0.02', q_torsion(shaft.sections[i+1][0][1], self.material[1]))])
+				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1]/1000)), Kfs('diameter-0.02', q_torsion(self.material[1]/1000))])
 
 		self.stress_points.sort()
 		print(self.stress_points)
@@ -177,7 +177,7 @@ class ShaftProject:
 			self.material.append(f)
 	#}}}
 
-	#{{{
+	#CalcGoodman{{{
 	def CalcGoodman(self):
 	
 		Ma = 0
@@ -198,6 +198,27 @@ class ShaftProject:
 			print(point)
 			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
 		#return Goodman(d, Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(d), 1, 1, 1, 1), self.material[1], Kf, Kfs, Ma, Tm)
+	#}}}
+	#CalcASME{{{
+	def CalcASME(self):
+	
+		Ma = 0
+		Tm = 0
+
+		for point in self.stress_points:
+			for i in range(len(self.plot_m_tot)-1):
+				if point[0] >= self.plot_m_tot[i][0] and point[0] < self.plot_m_tot[i+1][0]:
+					Ma = Get_y(self.plot_m_tot[i][0], self.plot_m_tot[i][1], self.plot_m_tot[i+1][0], self.plot_m_tot[i+1][1], point[0])
+					#break
+					print(Get_y(self.plot_m_tot[i][0], self.plot_m_tot[i][1], self.plot_m_tot[i+1][0], self.plot_m_tot[i+1][1], point[0]))
+			
+			for i in range(len(self.plot_t)-1):
+				if point[0] >= self.plot_t[i][0] and point[0] < self.plot_t[i+1][0]:
+					Tm = self.plot_t[i][1]
+					#break
+
+			print(point)
+			print(ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm))
 	#}}}
 #}}}
 
@@ -247,9 +268,10 @@ def Kfs(stress, q):
 #}}}
 
 #Function q{{{
-def q_bending(r, Sut):
+#r é o raio do entalhe (entre 0 e 4 mm). Sut deve estar em GPa
+def q_bending(Sut, r=0.1):
 	return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
-def q_torsion(r, Sut):
+def q_torsion(Sut, r=0.1):
 	return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
 #}}}
 
@@ -259,8 +281,8 @@ def Goodman(d, Se, Sut, Kf, Kfs, Ma, Tm):
 #}}}
 
 #Function ASME-Elliptic{{{
-#def ASME_Elliptic(d, Se, Sy, Kf, Kfs, Ma, Tm):
-#	return (3.1415 * d**3)/(4*(Kf*Ma/Se)**2 + 3(Kfs*Tm/Sy)**2)**0.5
+def ASME_Elliptic(d, Se, Sy, Kf, Kfs, Ma, Tm):
+	return (3.1415 * (d**3))/(16*((4*((Kf*Ma/Se)**2) + 3*((Kfs*Tm/Sy)**2))**0.5))
 #}}}
 
 #Function Get_y{{{

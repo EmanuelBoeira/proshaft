@@ -51,14 +51,16 @@ class ShaftController:
 
 	#add methods to add e remove stress
 	#AddStressToModel{{{
-	def AddStressToModel(self, stress, variables):
+	def AddStressToModel(self, x, stress, variables):
 		if stress == 'stop ring':
-			for section in self.model.sections:
-				if section[1][0] >= variables[0]:
-					variables.append(section[0][1]*2)
-				else:
-					variables.append(0)
-		self.model.AddStress(stress, variables)
+			for s in self.model.sections:
+				if x >= s[0][0] and x < s[1][0]:
+					self.model.AddStress(x, s[0][1]*2, stress, variables)
+
+		elif stress == 'flat key':
+			for s in self.model.sections:
+				if x >= s[0][0] and x < s[1][0]:
+					self.model.AddStress(x, s[0][1]*2, stress, variables)
 	#}}}
 
 	#remove stress from the model
@@ -87,7 +89,7 @@ class ShaftController:
 			self.view.tree_stress.delete(i)
 		if self.model.stress != []:
 			for stress in self.model.stress:
-				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[0], stress[1][0]))
+				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[2], stress[0]))
 	#}}}
 
 	#update the info of treeview forces
@@ -179,10 +181,10 @@ class ShaftController:
 			#draws each type of stress concentration on canvas
 			if self.model.stress != []:
 				for stress in self.model.stress:
-					if stress[0] == 'flat key':
-						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[1][0]*fator , 125, stress[1][1]*fator, stress[1][2]*fator)
-					if stress[0] == 'stop ring':
-						drawStopRing(self.view.canvas_long, (210-(Ltotal/2))+stress[1][0]*fator, 125, stress[1][3]*fator, stress[1][1]*fator, stress[1][2]*fator)
+					if stress[2] == 'flat key':
+						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator , 125, stress[3][0]*fator, stress[3][1]*fator)
+					if stress[2] == 'stop ring':
+						drawStopRing(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator, 125, stress[1]*fator, stress[3][0]*fator, stress[3][1]*fator)
 
 			#draw arrows for each force in the model
 			for force in self.model.forces_xy:
@@ -246,6 +248,9 @@ class ShaftController:
 	def CalculateGoodman(self):
 		self.shaft_project.CalcGoodman()
 	#}}}
+	#CalculateASME
+	def CalculateASME(self):
+		self.shaft_project.CalcASME()
 #}}}
 
 #Function drawArrowV{{{
