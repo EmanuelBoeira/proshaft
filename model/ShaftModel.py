@@ -6,9 +6,7 @@ class Shaft:
 	supports = []    #distance x of the 2 supports
 	forces_xy = []   #forces in the shaft in plane xy [x, y, F]
 	forces_xz = []   #forces in the shaft in plane xz [x, y, F]
-	moments_xy = []  #moments in plane xy [x,m]
-	moments_xz = []  #moments in plane xz [x,m]
-	stress = []      #list of stress concentrations in the shaft [x, type, [variables]]
+	stress = []      #list of stress concentrations in the shaft [x, d, type, [variables]]
 
 	#constructor of the class shaft.
 	def __init__(self):
@@ -41,8 +39,8 @@ class Shaft:
 	#}}}
 
     #method to add a position of a support in the list supports.
-	#AddSupport{{{
-	def AddSupport(self, x, i):
+	#ModifySupport{{{
+	def ModifySupport(self, x, i):
 		self.supports[i] = x
 	#}}}
 
@@ -75,8 +73,8 @@ class Shaft:
 	#}}}
 
 	#AddStress{{{
-	def AddStress(self, stress, variables):
-		self.stress.append([stress, variables])
+	def AddStress(self, x, d, stress, variables):
+		self.stress.append([x, d, stress, variables])
 		self.stress.sort()
 	#}}}
 
@@ -85,12 +83,5 @@ class Shaft:
 		self.stress.remove(self.stress[i])
 	#}}}
 
-	#AddMoment{{{
-	def AddMoment(self, x, m, plane_xy):
-		if plane_xy:
-			self.moments_xy.append([x, m])
-		else:
-			self.moments_xz.append([x, m])
-	#}}}
 #}}}
 

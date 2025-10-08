@@ -124,10 +124,10 @@ class ShaftController:
 	#}}}
 
 	#modify the distance x of the support i
-	#ModeifySupport{{{
+	#ModifySupport{{{
 	def ModifySupport(self, x, i):
 		if self.model.sections[-1][1][0] > x:
-			self.model.AddSupport(x, i)
+			self.model.ModifySupport(x, i)
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
@@ -204,8 +204,8 @@ class ShaftController:
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
 	def CalculateShaft(self, m):
-		self.shaft_project = ShaftProject.ShaftProject(self.model)
-		self.shaft_project.SetMaterial(m)
+		self.shaft_project = ShaftProject.ShaftProject(self.model, m, 'usinado')
+		#self.shaft_project.SetMaterial(m, 'usinado')
 		print(self.shaft_project.material)
 	#}}}
 
@@ -239,6 +239,12 @@ class ShaftController:
 
 		if plot == 'Torque':
 			drawPlot(self.view.canvas_plots, self.shaft_project.plot_t, 100, 250, 'T(N.m)')
+	#}}}
+
+	#fazer isso no ShaftProjectModel
+	#CalculateGoodman{{{
+	def CalculateGoodman(self):
+		self.shaft_project.CalcGoodman()
 	#}}}
 #}}}
 

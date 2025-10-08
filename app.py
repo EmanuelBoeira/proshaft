@@ -27,8 +27,8 @@ shaft.AddForce(70, 10, False, True, -876)
 shaft.AddForce(70, 150, True, True, 2400)
 shaft.AddForce(215, 10, False, True, -3937)
 shaft.AddForce(215, 33.5, True, True, -10814)
-shaft.AddSupport(20,0)
-shaft.AddSupport(270,1)
+shaft.ModifySupport(20,0)
+shaft.ModifySupport(270,1)
 
 print(shaft.forces_xz)
 

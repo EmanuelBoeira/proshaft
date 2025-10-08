@@ -7,15 +7,23 @@ class ShaftProject:
 	plot_m_xz  =  []
 	plot_m_tot =  []
 	plot_t     =  []
-	material   =  ''
+	material   =  [] # [material, Sut, Sy, Surface Factor]
+	stress_points = []
 
 	#init{{{
-	def __init__(self, shaft):
+	def __init__(self, shaft, mat, fac):
 		self.plot_f_xy.append([0,0])
 		self.plot_f_xz.append([0,0])
 		self.plot_m_xy.append([0,0])
 		self.plot_m_xz.append([0,0])
 		self.plot_t.append([0,0])
+
+		self.material.clear()
+		if mat == "Aço 1050":
+			self.material.append(mat)
+			self.material.append(1090)
+			self.material.append(793)
+			self.material.append(fac)
 
 		#add forces and torque from the shaft
 		for f in shaft.forces_xy:
@@ -133,9 +141,21 @@ class ShaftProject:
 		for i in range(len(self.plot_m_xy)):
 			self.plot_m_tot.append([self.plot_m_xy[i][0], ((self.plot_m_xy[i][1]**2)+(self.plot_m_xz[i][1]**2))**0.5])
 			
+		#adicionar pontos de interesse em stress_points
+		for s in shaft.stress:
+			self.stress_points.append([s[0], s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
+
+		for i in range(len(shaft.sections)-1):
+			if shaft.sections[i][1][1] < shaft.sections[i+1][0][1]:
+				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(shaft.sections[i][1][1], self.material[1])), Kfs('diameter-0.02', q_torsion(shaft.sections[i][1][1], self.material[1]))])
+			else:
+				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(shaft.sections[i+1][0][1], self.material[1])), Kfs('diameter-0.02', q_torsion(shaft.sections[i+1][0][1], self.material[1]))])
+
+		self.stress_points.sort()
+		print(self.stress_points)
 	#}}}
 
-	#clean the values{{{
+	#clean{{{
 	def Clean(self):
 		self.plot_f_xy.clear()
 		self.plot_f_xz.clear()
@@ -144,12 +164,40 @@ class ShaftProject:
 		self.plot_m_xz.clear()
 		self.plot_m_tot.clear()
 		self.plot_t.clear()
-		self.material   =  ''
+		self.material.clear()
 	#}}}
 
-	#SetMateril{{{
-	def SetMaterial(self, m):
-		self.material = m
+	#SetMaterial{{{
+	def SetMaterial(self, m, f):
+		self.material.clear()
+		if m == "Aço 1050":
+			self.material.append(m)
+			self.material.append(1090)
+			self.material.append(793)
+			self.material.append(f)
+	#}}}
+
+	#{{{
+	def CalcGoodman(self):
+	
+		Ma = 0
+		Tm = 0
+
+		for point in self.stress_points:
+			for i in range(len(self.plot_m_tot)-1):
+				if point[0] >= self.plot_m_tot[i][0] and point[0] < self.plot_m_tot[i+1][0]:
+					Ma = Get_y(self.plot_m_tot[i][0], self.plot_m_tot[i][1], self.plot_m_tot[i+1][0], self.plot_m_tot[i+1][1], point[0])
+					#break
+			
+			for i in range(len(self.plot_t)-1):
+				if point[0] >= self.plot_t[i][0] and point[0] < self.plot_t[i+1][0]:
+					Tm = self.plot_t[i][1]
+					#break
+
+		for point in self.stress_points:
+			print(point)
+			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
+		#return Goodman(d, Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(d), 1, 1, 1, 1), self.material[1], Kf, Kfs, Ma, Tm)
 	#}}}
 #}}}
 
@@ -177,37 +225,46 @@ def kb(d):
 #}}}
 
 #Function Kf{{{
-def Kf(stress, val, q):
+def Kf(stress, q):
 	#list of stresses. [stress, Kt, Kts, value for selection]
-	stress_list = [['diameter', 2.7, 2.2, 0.02], ['diameter', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+	stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
 
 	for s in stress_list:
-		if s == stress:
+		if s[0] == stress:
 			return 1+(q*(s[1]-1))
 			break
-	
-	return 0
 #}}}
 
 #Function Kfs{{{
-def Kfs(stress, val, q):
+def Kfs(stress, q):
 	#list of stresses. [stress, Kt, Kts, value for selection]
-	stress_list = [['diameter', 2.7, 2.2, 0.02], ['diameter', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+	stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
 
 	for s in stress_list:
-		if s == stress:
+		if s[0] == stress:
 			return 1+(q*(s[2]-1))
 			break
-	
-	return 0
 #}}}
 
 #Function q{{{
-def q(t, r, Sut):
-	if t == 'torsion':
-		return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
-	elif t == 'bending':
-		return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
-	else:
-		return 0
+def q_bending(r, Sut):
+	return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+def q_torsion(r, Sut):
+	return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+#}}}
+
+#Function Goodman{{{
+def Goodman(d, Se, Sut, Kf, Kfs, Ma, Tm):
+	return (3.1415 * d**3)/(((16/Se)*(4*(Kf*Ma)**2)**0.5) + ((16/Sut)*(3*(Kfs*Tm)**2)**0.5))
+#}}}
+
+#Function ASME-Elliptic{{{
+#def ASME_Elliptic(d, Se, Sy, Kf, Kfs, Ma, Tm):
+#	return (3.1415 * d**3)/(4*(Kf*Ma/Se)**2 + 3(Kfs*Tm/Sy)**2)**0.5
+#}}}
+
+#Function Get_y{{{
+#this function returns y for a x, traicing a line between points [x1,y1] and [x2,y2]
+def Get_y(x1, y1, x2, y2, x):
+	return (((y2-y1)/(x2-x1))*(x-x1))+y1
 #}}}

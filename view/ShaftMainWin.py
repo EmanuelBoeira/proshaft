@@ -78,7 +78,7 @@ class ShaftMainWindow:
 		text_material = ttk.Label(self.frame_calc, text='Material:')
 		text_material.place(x=350, y=10)
 
-		material_list = ['Alumínio', 'Aço 1020']
+		material_list = ['Alumínio', 'Aço 1050']
 
 		self.material = tk.StringVar()
 		self.combo_box_materials = ttk.Combobox(self.frame_calc, textvariable=self.material, values = material_list, state = 'readonly')
@@ -128,6 +128,7 @@ class ShaftMainWindow:
 				self.controller.CalculateShaft(self.material.get())
 			elif(self.frame_plots.winfo_ismapped()):
 				print('gerar pdf...')
+				self.controller.CalculateGoodman()
 		else:
 			if(self.frame_calc.winfo_ismapped()):
 				self.frame_draw.place(x=10, y=270)
