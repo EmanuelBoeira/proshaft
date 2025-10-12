@@ -27,6 +27,9 @@ class ShaftSectionWindow:
 		self.l = tk.Entry(self.root, width=100)
 		self.l.place(x=100, y=140, width=100)
 
+		self.section_img = tk.PhotoImage(file='./assets/section.png')
+		ttk.Label(self.root, image=self.section_img).place(x=250, y=50, width=100, height=100)
+
 		self.buttonAddSection = tk.Button(self.root, text='Adicionar', command =lambda: [self.AddSection(), self.controller.UpdateSectionTreeview(), self.controller.UpdateCanvas(), self.root.destroy()])
 		self.buttonAddSection.place(x=220, y=240, width=120, height=30)
 

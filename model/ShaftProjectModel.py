@@ -1,3 +1,7 @@
+from reportlab.pdfgen import canvas
+import webbrowser
+
+
 #class for Shaft Project{{{
 class ShaftProject:
 	plot_f_xy  =  []
@@ -202,6 +206,8 @@ class ShaftProject:
 	#CalcASME{{{
 	def CalcASME(self):
 	
+		results = canvas.Canvas("eixo.pdf")
+
 		Ma = 0
 		Tm = 0
 
@@ -217,14 +223,24 @@ class ShaftProject:
 					Tm = self.plot_t[i][1]
 					#break
 
+			ny = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
+
 			print(point)
+
+			results.drawString(100, 500-(self.stress_points.index(point)*50), 'n{} = {}'.format(self.stress_points.index(point)+1, ny))
+
 			print(ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm))
+
+		results.showPage()
+		results.save()
+
+		webbrowser.open('eixo.pdf')
 	#}}}
 #}}}
 
 #Function Se{{{
 #function to calculate fatigue endurance limit.
-def Se(Sut, ka, kb, kc, kd, ke, kf):
+def Se(Sut, ka=1, kb=1, kc=1, kd=1, ke=1, kf=1):
 	return (0.5*Sut)*ka*kb*kc*kd*ke*kf
 #}}}
 

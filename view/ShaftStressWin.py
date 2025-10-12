@@ -55,6 +55,9 @@ class ShaftStressWindow:
 
 		self.b = ttk.Entry(self.frame_flat_key)
 		self.b.place(x=60, y=70, width=100)
+
+		self.flat_key_img = tk.PhotoImage(file='./assets/flat-key.png')
+		ttk.Label(self.frame_flat_key, image=self.flat_key_img).place(x=200, y=10, width=50, height=50)
 		#}}}
 
 		#frame_stop_ring elements{{{
@@ -76,6 +79,9 @@ class ShaftStressWindow:
 
 		self.s_stop_ring = ttk.Entry(self.frame_stop_ring)
 		self.s_stop_ring.place(x=60, y=70, width=100)
+
+		self.stop_ring_img = tk.PhotoImage(file='./assets/stop-ring.png')
+		ttk.Label(self.frame_stop_ring, image=self.stop_ring_img).place(x=200, y=0, width=150, height=150)
 		#}}}
 
 	#Function SwitchFrame{{{
