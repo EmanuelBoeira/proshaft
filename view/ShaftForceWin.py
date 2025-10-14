@@ -14,7 +14,7 @@ class ShaftForceWindow:
 
 		#atributos da janela.{{{
 		self.root.title('Adicionar força')
-		self.root.geometry('500x300')
+		self.root.geometry('500x300+{}+{}'.format(self.root.winfo_screenwidth()//2-250, self.root.winfo_screenheight()//2-150))
 		self.root.resizable(False, False)
 		#}}}
 

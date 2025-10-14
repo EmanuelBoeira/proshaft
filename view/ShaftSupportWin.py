@@ -11,7 +11,7 @@ class ShaftSupportWindow:
 
 		#atributos da janela.
 		self.root.title('Adicionar suporte')
-		self.root.geometry('300x200')
+		self.root.geometry('300x200+{}+{}'.format(self.root.winfo_screenwidth()//2-150, self.root.winfo_screenheight()//2-100))
 		self.root.resizable(False, False)
 
 		#elementos de root.

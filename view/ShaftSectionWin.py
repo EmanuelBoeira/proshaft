@@ -11,7 +11,7 @@ class ShaftSectionWindow:
 
 		#window atributes
 		self.root.title('Adicionar seção')
-		self.root.geometry('500x300')
+		self.root.geometry('500x300+{}+{}'.format(self.root.winfo_screenwidth()//2-250, self.root.winfo_screenheight()//2-150))
 		self.root.resizable(False, False)
 
 		#root elements.

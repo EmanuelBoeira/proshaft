@@ -17,7 +17,7 @@ class ShaftMainWindow:
 		self.controller = None
 
 		#window atributes
-		self.root.geometry('700x650')
+		self.root.geometry('700x650+{}+{}'.format(self.root.winfo_screenwidth()//2-350, self.root.winfo_screenheight()//2-325))
 		self.root.title('proshaft')
 		self.root.resizable(False, False)
 
