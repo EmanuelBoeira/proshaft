@@ -7,8 +7,6 @@ sys.path.append('../view/')
 
 import tkinter as tk
 from tkinter.messagebox import showwarning
-#import matplotlib.pyplot as plt
-#import numpy as np
 
 import ShaftModel as Shaft
 import ShaftProjectModel as ShaftProject
