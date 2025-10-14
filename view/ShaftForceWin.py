@@ -34,7 +34,7 @@ class ShaftForceWindow:
 		self.r = ttk.Radiobutton(self.root, text='radial', variable=self.tangential, value=False, command = self.Hide)
 		self.r.place(x=50, y=170)
 
-		self.t = ttk.Radiobutton(self.root, text='tangencial', variable=self.tangential, value=True, command = self.Hide)
+		self.t = ttk.Radiobutton(self.root, text='tangencial(torque)', variable=self.tangential, value=True, command = self.Hide)
 		self.t.place(x=50, y=150)
 
 		self.text3 = tk.Label(self.root, text='F(N):')
@@ -72,4 +72,4 @@ class ShaftForceWindow:
 			self.yorz.place_forget()
 
 	def AddForce(self):
-		self.controller.AddForceToModel(float(self.x.get()), float(self.yorz.get()), self.tangential.get(), self.plane_xy.get(), float(self.F.get()))
+		self.controller.AddForceToModel(float(self.x.get()), 0 if self.yorz.get() == '' else float(self.yorz.get()), self.tangential.get(), self.plane_xy.get(), float(self.F.get()))
