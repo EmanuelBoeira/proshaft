@@ -4,18 +4,19 @@ import webbrowser
 
 #class for Shaft Project{{{
 class ShaftProject:
-	plot_f_xy  =  []
-	plot_f_xz  =  []
-	plot_f_tot =  []
-	plot_m_xy  =  []
-	plot_m_xz  =  []
-	plot_m_tot =  []
-	plot_t     =  []
-	material   =  [] # [material, Sut, Sy, Surface Factor]
-	stress_points = []
+	plot_f_xy  =    [] # [x, F]
+	plot_f_xz  =    [] # [x, F]
+	plot_f_tot =    [] # [x, Ftot]
+	plot_m_xy  =    [] # [x, M]
+	plot_m_xz  =    [] # [x, M]
+	plot_m_tot =    [] # [x, Mtot]
+	plot_t     =    [] # [x, T]
+	material   =    [] # [material, Sut, Sy, Surface Factor]
+	stress_points = [] # [x, d, Kf, Kfs]
 
 	#init{{{
 	def __init__(self, shaft, mat, fac):
+		#clean the variables and aply initial conditions{{{
 		self.plot_f_xy.append([0,0])
 		self.plot_f_xz.append([0,0])
 		self.plot_m_xy.append([0,0])
@@ -23,13 +24,34 @@ class ShaftProject:
 		self.plot_t.append([0,0])
 
 		self.material.clear()
-		if mat == "Aço 1050":
+		if mat == "Aço 1050(temperado 800°F)":
 			self.material.append(mat)
 			self.material.append(1090)
 			self.material.append(793)
 			self.material.append(fac)
+		elif mat == "Aço 1020(laminado a quente)":
+			self.material.append(mat)
+			self.material.append(379)
+			self.material.append(207)
+			self.material.append(fac)
+		elif mat == "Aço 1040(laminado a quente)":
+			self.material.append(mat)
+			self.material.append(524)
+			self.material.append(290)
+			self.material.append(fac)
+		elif mat == "Aço 1050(laminado a quente)":
+			self.material.append(mat)
+			self.material.append(621)
+			self.material.append(345)
+			self.material.append(fac)
+		elif mat == "Alíminio":
+			self.material.append(mat)
+			self.material.append(55)
+			self.material.append(15)
+			self.material.append(fac)
+		#}}}
 
-		#add forces and torque from the shaft
+		#add forces and torque from the shaft{{{
 		for f in shaft.forces_xy:
 			self.plot_f_xy.append([f[0], f[2]])
 
@@ -42,7 +64,7 @@ class ShaftProject:
 			if f[1] != 0:
 				self.plot_t.append([f[0], f[1]*f[2]])
 
-		#calculate the reactions on supports of shaft{{{
+		#calculate the reactions on supports of shaft
 		rxy1 = 0
 		rxz1 = 0
 		rxy2 = 0
@@ -74,6 +96,7 @@ class ShaftProject:
 		self.plot_f_xz.sort()
 		#}}}
 
+		#organize forces for plot{{{
 		points_to_add = []
 
 		#organize forces xy to plot
@@ -120,6 +143,7 @@ class ShaftProject:
 			self.plot_t.insert(p[0], p[1])
 
 		points_to_add = []
+		#}}}
 
 		#calculate bending mement by area{{{
 		for i in range(len(self.plot_f_xy)-1):
@@ -137,29 +161,32 @@ class ShaftProject:
 			self.plot_m_xz[i+1][1] = self.plot_m_xz[i][1] + self.plot_m_xz[i+1][1]
 		#}}}
 
-		#Calculate Ftot
+		#Calculate Ftot{{{
 		for i in range(len(self.plot_f_xy)):
 			self.plot_f_tot.append([self.plot_f_xy[i][0], ((self.plot_f_xy[i][1]**2)+(self.plot_f_xz[i][1]**2))**0.5])
+		#}}}
 			
-		#calculate Mtot
+		#calculate Mtot{{{
 		for i in range(len(self.plot_m_xy)):
 			self.plot_m_tot.append([self.plot_m_xy[i][0], ((self.plot_m_xy[i][1]**2)+(self.plot_m_xz[i][1]**2))**0.5])
+		#}}}
 			
-		#adicionar pontos de interesse em stress_points
+		#adicionar pontos de interesse em stress_points{{{
 		for s in shaft.stress:
 			self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
 
 		for i in range(len(shaft.sections)-1):
 			if shaft.sections[i][1][1] < shaft.sections[i+1][0][1]:
-				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(self.material[1]/1000)), Kfs('diameter-0.02', q_torsion(self.material[1]/1000))])
+				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
 			else:
-				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1]/1000)), Kfs('diameter-0.02', q_torsion(self.material[1]/1000))])
+				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
 
 		self.stress_points.sort()
 		print(self.stress_points)
+		#}}}
 	#}}}
-
 	#clean{{{
+	#This method clean the variables to recalculate without keep values
 	def Clean(self):
 		self.plot_f_xy.clear()
 		self.plot_f_xz.clear()
@@ -170,17 +197,6 @@ class ShaftProject:
 		self.plot_t.clear()
 		self.material.clear()
 	#}}}
-
-	#SetMaterial{{{
-	def SetMaterial(self, m, f):
-		self.material.clear()
-		if m == "Aço 1050":
-			self.material.append(m)
-			self.material.append(1090)
-			self.material.append(793)
-			self.material.append(f)
-	#}}}
-
 	#CalcGoodman{{{
 	def CalcGoodman(self):
 	
@@ -199,9 +215,7 @@ class ShaftProject:
 					#break
 
 		for point in self.stress_points:
-			print(point)
 			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
-		#return Goodman(d, Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(d), 1, 1, 1, 1), self.material[1], Kf, Kfs, Ma, Tm)
 	#}}}
 	#CalcASME{{{
 	def CalcASME(self):
@@ -216,7 +230,6 @@ class ShaftProject:
 				if point[0] >= self.plot_m_tot[i][0] and point[0] < self.plot_m_tot[i+1][0]:
 					Ma = Get_y(self.plot_m_tot[i][0], self.plot_m_tot[i][1], self.plot_m_tot[i+1][0], self.plot_m_tot[i+1][1], point[0])
 					#break
-					print(Get_y(self.plot_m_tot[i][0], self.plot_m_tot[i][1], self.plot_m_tot[i+1][0], self.plot_m_tot[i+1][1], point[0]))
 			
 			for i in range(len(self.plot_t)-1):
 				if point[0] >= self.plot_t[i][0] and point[0] < self.plot_t[i+1][0]:
@@ -225,11 +238,7 @@ class ShaftProject:
 
 			ny = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
 
-			print(point)
-
-			results.drawString(100, 500-(self.stress_points.index(point)*50), 'n{} = {}'.format(self.stress_points.index(point)+1, ny))
-
-			print(ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm))
+			results.drawString(100, 500-(self.stress_points.index(point)*50), 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), ny))
 
 		results.showPage()
 		results.save()
@@ -244,7 +253,7 @@ def Se(Sut, ka=1, kb=1, kc=1, kd=1, ke=1, kf=1):
 	return (0.5*Sut)*ka*kb*kc*kd*ke*kf
 #}}}
 
-#function ka{{{
+#Function ka{{{
 #function to calculate factor  ka.
 def ka(Sut, x, y):
 	return x*(Sut**y)
@@ -259,6 +268,27 @@ def kb(d):
 		return 1.51 * (d*(-0.157))
 	else:
 		return 0
+#}}}
+
+#Function kd{{{
+def kd(temp):
+	temp = (temp*1.8)+32
+
+	return 0.975+(0.000432*temp)-(0.00000115*(temp**2))+(0.00000000104*(temp**3))-(0.000000000000595*(temp**4))
+#}}}
+
+#Function ke{{{
+def ke(conf):
+	if conf == 50.0:
+		return 1.0
+	elif conf == 90.0:
+		return 0.897
+	elif conf == 95.0:
+		return 0.868
+	elif conf == 99.0:
+		return 0.814
+	elif conf == 99.9:
+		return 0.753
 #}}}
 
 #Function Kf{{{
@@ -283,11 +313,13 @@ def Kfs(stress, q):
 			break
 #}}}
 
-#Function q{{{
-#r é o raio do entalhe (entre 0 e 4 mm). Sut deve estar em GPa
-def q_bending(Sut, r=0.1):
-	return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+#Functions q{{{
+#r é o raio do entalhe (entre 0 e 4 mm). Sut deve estar em MPa que é convertido em kpsi
 def q_torsion(Sut, r=0.1):
+	Sut = Sut*0.145
+	return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
+def q_bending(Sut, r=0.1):
+	Sut = Sut*0.145
 	return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
 #}}}
 

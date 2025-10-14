@@ -78,7 +78,7 @@ class ShaftMainWindow:
 		text_material = ttk.Label(self.frame_calc, text='Material:')
 		text_material.place(x=350, y=10)
 
-		material_list = ['Alumínio', 'Aço 1050']
+		material_list = ['Alumínio', 'Aço 1050(temperado 800°F)', 'Aço 1020(laminado a quente)', 'Aço 1040(laminado a quente)', 'Aço 1050(laminado a quente)']
 
 		self.material = tk.StringVar()
 		self.combo_box_materials = ttk.Combobox(self.frame_calc, textvariable=self.material, values = material_list, state = 'readonly')
