@@ -53,8 +53,12 @@ class ShaftController:
 		if self.model.sections[-1][1][0] > x:
 			if stress == 'stop ring':
 				for s in self.model.sections:
-					if x >= s[0][0] and x < s[1][0]:
-						self.model.AddStress(x, s[0][1]*2, stress, variables)
+					if s[0][1]*2 > variables[0]:
+						if x >= s[0][0] and x < s[1][0]:
+							self.model.AddStress(x, s[0][1]*2, stress, variables)
+					else:
+						showwarning(title='Diâmetro inadequado', message='Valor de d ultrapassa o diâmetro desta seção do eixo.')
+
 
 			elif stress == 'flat key':
 				for s in self.model.sections:
@@ -164,11 +168,11 @@ class ShaftController:
 			#total length of shaft in x
 			Ltotal = int(self.model.sections[-1][1][0]*fator)
 
+			radius = 0
+
 			#draw the section os the shaft.
 			for section in self.model.sections:
 				self.view.canvas_long.create_rectangle((int((210-(Ltotal/2))+(section[0][0]*fator)), int((125-(section[0][1]*fator)))), (int((210-(Ltotal/2))+(section[1][0]*fator)), int((125+(section[1][1]*fator)))), outline='black', width=2)
-
-				radius = 0
 				
 				if section[0][1] > radius:
 					radius = section[0][1]
@@ -255,7 +259,7 @@ class ShaftController:
 	#}}}
 	#CalculateASME{{{
 	def CalculateASME(self):
-		self.shaft_project.CalcASME()
+		self.shaft_project.CalcASME(self.model)
 	#}}}
 #}}}
 
@@ -263,23 +267,23 @@ class ShaftController:
 #functions to draw elements in canvas
 def drawArrowV(canvas, x, y, positive):
 	if positive:
-		canvas.create_polygon(((x+5,y+10),(x,y),(x-5,y+10)),fill='red')
-		canvas.create_line(((x,y+10),(x,y+40)),width=4,fill='red')
+		canvas.create_polygon(((x+5,y+10),(x,y),(x-5,y+10)),fill='green')
+		canvas.create_line(((x,y+10),(x,y+40)),width=4,fill='green')
 
 	else:
-		canvas.create_polygon(((x-5,y-10),(x,y),(x+5,y-10)),fill='red')
-		canvas.create_line(((x,y-10),(x,y-40)),width=4,fill='red')
+		canvas.create_polygon(((x-5,y-10),(x,y),(x+5,y-10)),fill='green')
+		canvas.create_line(((x,y-10),(x,y-40)),width=4,fill='green')
 #}}}
 
 #Function drawArrowH{{{
 def drawArrowH(canvas, x, y, positive):
 	if positive:
-		canvas.create_polygon(((x,y),(x-10,y+5),(x-10,y-5)), fill='red')
-		canvas.create_line(((x-10, y),(x-40,y)), width=4, fill='red')
+		canvas.create_polygon(((x,y),(x-10,y+5),(x-10,y-5)), fill='blue')
+		canvas.create_line(((x-10, y),(x-40,y)), width=4, fill='blue')
 	
 	else:
-		canvas.create_polygon(((x,y),(x+10,y-5),(x+10,y+5)), fill='red')
-		canvas.create_line(((x+10, y),(x+40,y)), width=4, fill='red')
+		canvas.create_polygon(((x,y),(x+10,y-5),(x+10,y+5)), fill='blue')
+		canvas.create_line(((x+10, y),(x+40,y)), width=4, fill='blue')
 #}}}
 
 #Function drawCircArrow{{{

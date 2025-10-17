@@ -1,4 +1,4 @@
-from reportlab.pdfgen import canvas
+from fpdf import FPDF
 import webbrowser
 
 
@@ -218,9 +218,13 @@ class ShaftProject:
 			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
 	#}}}
 	#CalcASME{{{
-	def CalcASME(self):
+	def CalcASME(self, shaft):
 	
-		results = canvas.Canvas("eixo.pdf")
+		results = FPDF()
+		results.add_page()
+		results.set_font("Arial", size=12)
+		results.set_fill_color(r=255, g=155, b=155)
+		results.cell(180, 50, ln=2)
 
 		Ma = 0
 		Tm = 0
@@ -238,10 +242,10 @@ class ShaftProject:
 
 			ny = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
 
-			results.drawString(100, 500-(self.stress_points.index(point)*50), 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), ny))
+			results.cell(0,15, 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), ny), ln=2)
 
-		results.showPage()
-		results.save()
+		drawShaftinPDF(results, shaft, self.stress_points)
+		results.output("eixo.pdf")
 
 		webbrowser.open('eixo.pdf')
 	#}}}
@@ -337,4 +341,20 @@ def ASME_Elliptic(d, Se, Sy, Kf, Kfs, Ma, Tm):
 #this function returns y for a x, traicing a line between points [x1,y1] and [x2,y2]
 def Get_y(x1, y1, x2, y2, x):
 	return (((y2-y1)/(x2-x1))*(x-x1))+y1
+#}}}
+
+#Function drawShaftInPDF{{{
+def drawShaftinPDF(canvas, shaft, stress_points):
+	#180x50
+	factor = 1
+
+	if shaft.sections[-1][1][0] > 180:
+		factor = 180/shaft.sections[-1][1][0]
+
+	for s in shaft.sections:
+		canvas.rect(10+s[0][0]*factor, 35-s[0][1]*factor, w=(s[1][0]-s[0][0])*factor, h=s[0][1]*2*factor)
+
+	for p in stress_points:
+		canvas.circle(10+p[0]*factor, 35, radius=3, style='FD')
+		canvas.text(9+p[0]*factor, 36, text=chr(97+stress_points.index(p)))
 #}}}
