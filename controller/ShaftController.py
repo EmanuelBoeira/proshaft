@@ -29,7 +29,6 @@ class ShaftController:
 			self.view.button_next.config(state=tk.DISABLED)
 			#self.view.buttonCalc.state(['disabled'])
 	#}}}
-
 	#add a section to the model shaft
 	#AddSectionToModel{{{
 	def AddSectionToModel(self, x1, y1, x2, y2):
@@ -39,14 +38,12 @@ class ShaftController:
 			x = float(self.model.sections[-1][1][0])
 			self.model.AddSection(x, y1, (x+x2), y2)
 	#}}}
-
 	#remove section
 	#RemoveSection{{{
 	def RemoveSection(self, i):
 		for x in range(len(self.model.sections)-i):
 			self.model.RemoveSection(i)
 	#}}}
-
 	#add methods to add e remove stress
 	#AddStressToModel{{{
 	def AddStressToModel(self, x, stress, variables):
@@ -68,14 +65,12 @@ class ShaftController:
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-
 	#remove stress from the model
 	#RemoveStress{{{
 	def RemoveStress(self, i):
 		for stress in self.model.stress:
 			self.model.RemoveStress(i)
 	#}}}
-
 	#update the informations of sections treeview
 	#UpdateSectionTreeview{{{
 	def UpdateSectionTreeview(self):
@@ -87,7 +82,6 @@ class ShaftController:
 			for section in self.model.sections:
 				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(((section[0][1])*2, (section[1][0]-section[0][0]))))
 	#}}}
-
 	#update the informations of stress treeview
 	#UpdateStressTreeview{{{
 	def UpdateStressTreeview(self):
@@ -97,7 +91,6 @@ class ShaftController:
 			for stress in self.model.stress:
 				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[2], stress[0]))
 	#}}}
-
 	#update the info of treeview forces
 	#UpdateForceTreeview{{{
 	def UpdateForceTreeview(self):
@@ -112,7 +105,6 @@ class ShaftController:
 			for force in self.model.forces_xz:
 				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s N'%(force[2]))
 	#}}}
-
 	#add force to model
 	#AddForceToModel{{{
 	def AddForceToModel(self, x, y, plane_xy, F):
@@ -121,7 +113,6 @@ class ShaftController:
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-
 	#remove force from model
 	#RemoveForce{{{
 	def RemoveForce(self, i):
@@ -130,7 +121,6 @@ class ShaftController:
 		else:
 			self.model.RemoveForce(i, True)
 	#}}}
-
 	#modify the distance x of the support i
 	#ModifySupport{{{
 	def ModifySupport(self, x, i):
@@ -139,7 +129,6 @@ class ShaftController:
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-
 	#update long and axal canvas
 	#{{{update canvas_long and canvas_axial
 	def UpdateCanvas(self):
@@ -205,7 +194,6 @@ class ShaftController:
 		else:
 			self.view.button_next.config(state=tk.DISABLED)
 	#}}}
-
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
 	def CalculateShaft(self, m, fac):
@@ -216,12 +204,10 @@ class ShaftController:
 			showwarning(title='Material não definido!', message='Defina um material para o eixo.')
 			
 	#}}}
-
 	#clean the values calculated in project{{{
 	def CleanCalc(self):
 		self.shaft_project.Clean()
 	#}}}
-
 	#plot math data in canvas from the last frame
 	#PlotInCanvas{{{
 	def PlotInCanvas(self, plot):
@@ -248,7 +234,6 @@ class ShaftController:
 		if plot == 'Torque':
 			drawPlot(self.view.canvas_plots, self.shaft_project.plot_t, 100, 250, 'T(N.m)')
 	#}}}
-
 	#fazer isso no ShaftProjectModel
 	#CalculateGoodman{{{
 	def CalculateGoodman(self):
