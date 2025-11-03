@@ -46,18 +46,11 @@ class Shaft:
 
     #method to add a force to list forces. x is the x coordenate, y_or_z is the y or z coordenate, tangential is bool value (True if is tangential), plane_xy is a bool value (True if is in xy) and F is the magnitude.
 	#AddForce{{{
-	def AddForce(self, x, y_or_z, tangential, plane_xy, F):
-		if tangential:
-			if plane_xy:
-				self.forces_xz.append([x, y_or_z, F])
-			elif not plane_xy:
-				self.forces_xy.append([x, y_or_z, F])
-		#for radial forces, y or z doesn't matters
+	def AddForce(self, x, y_or_z, plane_xy, F):
+		if plane_xy:
+			self.forces_xy.append([x, y_or_z, F])
 		else:
-			if plane_xy:
-				self.forces_xy.append([x, 0, F])
-			else:
-				self.forces_xz.append([x, 0, F])
+			self.forces_xz.append([x, y_or_z, F])
 
 		self.forces_xy.sort()
 		self.forces_xz.sort()

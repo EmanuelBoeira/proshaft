@@ -51,10 +51,10 @@ class ShaftMainWindow:
 		treeviewScroll1 = tk.Scrollbar(self.tree_sections, orient=tk.VERTICAL)
 		treeviewScroll1.pack(side=tk.RIGHT, fill=tk.Y)
 
-		button_open_section_win = ttk.Button(self.frame_draw, text='Add section', command=self.OpenSectionWin)
+		button_open_section_win = ttk.Button(self.frame_draw, text='Adicionar seção', command=self.OpenSectionWin)
 		button_open_section_win.place(x=5, y=270, width=160, height=25)
 
-		button_remove_section = ttk.Button(self.frame_draw, text='Remove section', command = lambda :[self.RemoveSection(), self.controller.UpdateSectionTreeview(),self.controller.UpdateCanvas()])
+		button_remove_section = ttk.Button(self.frame_draw, text='Remover seção', command = lambda :[self.RemoveSection(), self.controller.UpdateSectionTreeview(),self.controller.UpdateCanvas()])
 		button_remove_section.place(x=175, y=270, width=160, height=25)
 
 		self.tree_stress = ttk.Treeview(self.frame_draw)
@@ -62,10 +62,10 @@ class ShaftMainWindow:
 		treeviewScroll3 = tk.Scrollbar(self.tree_stress, orient=tk.VERTICAL)
 		treeviewScroll3.pack(side=tk.RIGHT, fill=tk.Y)
 
-		button_open_stress_win = ttk.Button(self.frame_draw, text='Add stress', command=self.OpenStressWin)
+		button_open_stress_win = ttk.Button(self.frame_draw, text='Adicionar stress', command=self.OpenStressWin)
 		button_open_stress_win.place(x=345, y=270, width=160, height=25)
 
-		button_remove_stress = ttk.Button(self.frame_draw, text='Remove stress', command = lambda :[self.RemoveStress(), self.controller.UpdateStressTreeview(), self.controller.UpdateCanvas()])
+		button_remove_stress = ttk.Button(self.frame_draw, text='Remover stress', command = lambda :[self.RemoveStress(), self.controller.UpdateStressTreeview(), self.controller.UpdateCanvas()])
 		button_remove_stress.place(x=515, y=270, width=160, height=25)
 		#}}}
 
@@ -84,10 +84,19 @@ class ShaftMainWindow:
 		self.combo_box_materials = ttk.Combobox(self.frame_calc, textvariable=self.material, values = material_list, state = 'readonly')
 		self.combo_box_materials.place(x=350, y=40, width=310, height=30)
 
-		button_open_force_win = ttk.Button(self.frame_calc, text='Add force', command=self.OpenForceWin)
+		text_fabrication = ttk.Label(self.frame_calc, text='Método de fabricação:')
+		text_fabrication.place(x=350, y=90)
+
+		fabrication_method_list = ['Retificado', 'Usinado', 'Laminado a quente', 'Forjado']
+
+		self.fabrication = tk.StringVar()
+		self.combo_box_fabrication_methods = ttk.Combobox(self.frame_calc, textvariable=self.fabrication, values = fabrication_method_list, state='readonly')
+		self.combo_box_fabrication_methods.place(x=350, y=120, width=310, height=30)
+
+		button_open_force_win = ttk.Button(self.frame_calc, text='Adicionar força', command=self.OpenForceWin)
 		button_open_force_win.place(x=350, y=200, width=150, height=25)
 
-		button_remove_force = ttk.Button(self.frame_calc, text='Remove force', command = lambda: [self.RemoveForce(), self.controller.UpdateForceTreeview(), self.controller.UpdateCanvas()])
+		button_remove_force = ttk.Button(self.frame_calc, text='Remover força', command = lambda: [self.RemoveForce(), self.controller.UpdateForceTreeview(), self.controller.UpdateCanvas()])
 		button_remove_force.place(x=510, y=200, width=150, height=25)
 
 		button_open_support_win = ttk.Button(self.frame_calc, text='Editar suporte', command=self.OpenSupportWin)
@@ -122,7 +131,7 @@ class ShaftMainWindow:
 				self.frame_calc.place(x=10, y=270)
 				self.frame_draw.place_forget()
 			elif(self.frame_calc.winfo_ismapped()):
-				self.controller.CalculateShaft(self.material.get())
+				self.controller.CalculateShaft(self.material.get(), self.fabrication.get())
 				if self.material.get() != '':
 					self.frame_plots.place(x=10, y=270)
 					self.frame_calc.place_forget()
