@@ -62,9 +62,9 @@ class ShaftForceWindow:
 	def Hide(self):
 		if self.tangential.get():
 			if self.plane_xy.get():
-				self.text5['text'] = 'y(mm): '
-			else:
 				self.text5['text'] = 'z(mm): '
+			else:
+				self.text5['text'] = 'y(mm): '
 			self.text5.place(x=250, y=130)
 			self.yorz.place(x=360, y=130, width=100)
 		else:
@@ -72,4 +72,4 @@ class ShaftForceWindow:
 			self.yorz.place_forget()
 
 	def AddForce(self):
-		self.controller.AddForceToModel(float(self.x.get()), 0 if self.yorz.get() == '' else float(self.yorz.get()), self.tangential.get(), self.plane_xy.get(), float(self.F.get()))
+		self.controller.AddForceToModel(float(self.x.get()), 0 if self.yorz.get() == '' else float(self.yorz.get()), self.plane_xy.get(), float(self.F.get()))

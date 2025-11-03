@@ -53,17 +53,18 @@ class ShaftController:
 		if self.model.sections[-1][1][0] > x:
 			if stress == 'stop ring':
 				for s in self.model.sections:
-					if s[0][1]*2 > variables[0]:
-						if x >= s[0][0] and x < s[1][0]:
+					if x >= s[0][0] and x < s[1][0]:
+						if s[0][1]*2 > variables[0]:
 							self.model.AddStress(x, s[0][1]*2, stress, variables)
-					else:
-						showwarning(title='Diâmetro inadequado', message='Valor de d ultrapassa o diâmetro desta seção do eixo.')
-
+							break
+						else:
+							showwarning(title='Diâmetro inadequado', message='Valor de d ultrapassa o diâmetro desta seção do eixo.')
 
 			elif stress == 'flat key':
 				for s in self.model.sections:
 					if x >= s[0][0] and x < s[1][0]:
 						self.model.AddStress(x, s[0][1]*2, stress, variables)
+						break
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
@@ -114,9 +115,9 @@ class ShaftController:
 
 	#add force to model
 	#AddForceToModel{{{
-	def AddForceToModel(self, x, y, tangential, plane_xy, F):
+	def AddForceToModel(self, x, y, plane_xy, F):
 		if self.model.sections[-1][1][0] > x:
-			self.model.AddForce(x, y, tangential, plane_xy, F)
+			self.model.AddForce(x, y, plane_xy, F)
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
@@ -188,18 +189,14 @@ class ShaftController:
 
 			#draw arrows for each force in the model
 			for force in self.model.forces_xy:
+				drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125, True if force[2] > 0 else False)
 				if force[1] != 0:
-					drawArrowH(self.view.canvas_axial, 125, 125, False if force[2] > 0 else True)
-					drawCircArrow(self.view.canvas_axial, 125, 125, True if force[2] > 0 else False)
-				elif force[1] == 0:
-					drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
+					drawCircArrow(self.view.canvas_axial, 125, 125, True if (force[2] > 0 and force[1] < 0) or (force[2] < 0 and force[1] > 0) else False)
 
 			for force in self.model.forces_xz:
+				drawArrowH(self.view.canvas_axial, 125, 125, False if force[2] > 0 else True)
 				if force[1] != 0:
-					drawArrowH(self.view.canvas_axial, 125, 125, False if force[2] > 0 else True)
-					drawCircArrow(self.view.canvas_axial, 125, 125, True if force[2] > 0 else False)
-				elif force[1] == 0:
-					drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125-(float(force[1]))*fator, True if force[2] > 0 else False)
+					drawCircArrow(self.view.canvas_axial, 125, 125, True if (force[2] > 0 and force[1] > 0) or (force[2] < 0 and force[1] < 0) else False)
 
 			for support in self.model.supports:
 				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
@@ -211,9 +208,9 @@ class ShaftController:
 
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
-	def CalculateShaft(self, m):
+	def CalculateShaft(self, m, fac):
 		if m != '':
-			self.shaft_project = ShaftProject.ShaftProject(self.model, m, 'usinado')
+			self.shaft_project = ShaftProject.ShaftProject(self.model, m, fac)
 			print(self.shaft_project.material)
 		else:
 			showwarning(title='Material não definido!', message='Defina um material para o eixo.')
@@ -320,7 +317,7 @@ def drawStopRing(canvas, x, y, D, d, s):
 #Function drawPlot{{{
 def drawPlot(canvas, points, x, y, t):
 	#540x290
-	print(points)
+	#print(points)
 
 	p_max = 1
 	p_min = 0
@@ -353,7 +350,4 @@ def drawPlot(canvas, points, x, y, t):
 		if points[i+1][1] != points[i][1]:
 			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=3, fill='black')
 			canvas.create_text((x-35, y+(p_min*y_scale)-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]/1000), fill='black')
-		
-
-
 #}}}

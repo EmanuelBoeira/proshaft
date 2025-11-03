@@ -1,7 +1,6 @@
 from fpdf import FPDF
 import webbrowser
 
-
 #class for Shaft Project{{{
 class ShaftProject:
 	plot_f_xy  =    [] # [x, F]
@@ -62,7 +61,10 @@ class ShaftProject:
 			self.plot_f_xz.append([f[0], f[2]])
 
 			if f[1] != 0:
-				self.plot_t.append([f[0], f[1]*f[2]])
+				if (f[1] > 0 and f[2] < 0) or (f[1] < 0 and f[2] > 0):
+					self.plot_t.append([f[0], (f[1]*f[2])*(-1)])
+				else:
+					self.plot_t.append([f[0], f[1]*f[2]])
 
 		#calculate the reactions on supports of shaft
 		rxy1 = 0
@@ -162,13 +164,59 @@ class ShaftProject:
 		#}}}
 
 		#Calculate Ftot{{{
-		for i in range(len(self.plot_f_xy)):
-			self.plot_f_tot.append([self.plot_f_xy[i][0], ((self.plot_f_xy[i][1]**2)+(self.plot_f_xz[i][1]**2))**0.5])
+		for f in self.plot_f_xy:
+			self.plot_f_tot.append([f[0],0,0])
+
+		for f in self.plot_f_xz:
+			if [f[0]] not in self.plot_f_tot:
+				self.plot_f_tot.append([f[0],0,0])
+
+		self.plot_f_tot.sort()
+
+		for i in range(len(self.plot_f_tot)):
+			if self.plot_f_xy != []:
+				for j in range(len(self.plot_f_xy)-1):
+					if self.plot_f_tot[i][0] >= self.plot_f_xy[j][0] and self.plot_f_tot[i][0] <= self.plot_f_xy[j+1][0]:
+						self.plot_f_tot[i][1] = (Get_y(self.plot_f_xy[j][0], self.plot_f_xy[j][1], self.plot_f_xy[j+1][0], self.plot_f_xy[j+1][1], self.plot_f_tot[i][0]))**2
+						break
+
+			if self.plot_f_xz != []:
+				for j in range(len(self.plot_f_xz)-1):
+					if self.plot_f_tot[i][0] >= self.plot_f_xz[j][0] and self.plot_f_tot[i][0] <= self.plot_f_xz[j+1][0]:
+						self.plot_f_tot[i][2] = (Get_y(self.plot_f_xz[j][0], self.plot_f_xz[j][1], self.plot_f_xz[j+1][0], self.plot_f_xz[j+1][1], self.plot_f_tot[i][0]))**2
+						break
+
+		for point in self.plot_f_tot:
+			point[1] = (point[1] + point[2])**0.5
+			point.pop(-1)
 		#}}}
 			
 		#calculate Mtot{{{
-		for i in range(len(self.plot_m_xy)):
-			self.plot_m_tot.append([self.plot_m_xy[i][0], ((self.plot_m_xy[i][1]**2)+(self.plot_m_xz[i][1]**2))**0.5])
+		for m in self.plot_m_xy:
+			self.plot_m_tot.append([m[0],0,0])
+
+		for m in self.plot_m_xz:
+			if [f[0]] not in self.plot_m_tot:
+				self.plot_m_tot.append([m[0],0,0])
+
+		self.plot_m_tot.sort()
+
+		for i in range(len(self.plot_m_tot)):
+			if self.plot_m_xy != []:
+				for j in range(len(self.plot_m_xy)-1):
+					if self.plot_m_tot[i][0] >= self.plot_m_xy[j][0] and self.plot_m_tot[i][0] <= self.plot_m_xy[j+1][0]:
+						self.plot_m_tot[i][1] = (Get_y(self.plot_m_xy[j][0], self.plot_m_xy[j][1], self.plot_m_xy[j+1][0], self.plot_m_xy[j+1][1], self.plot_m_tot[i][0]))**2
+						break
+
+			if self.plot_m_xz != []:
+				for j in range(len(self.plot_m_xz)-1):
+					if self.plot_m_tot[i][0] >= self.plot_m_xz[j][0] and self.plot_m_tot[i][0] <= self.plot_m_xz[j+1][0]:
+						self.plot_m_tot[i][2] = (Get_y(self.plot_m_xz[j][0], self.plot_m_xz[j][1], self.plot_m_xz[j+1][0], self.plot_m_xz[j+1][1], self.plot_m_tot[i][0]))**2
+						break
+
+		for point in self.plot_m_tot:
+			point[1] = (point[1] + point[2])**0.5
+			point.pop(-1)
 		#}}}
 			
 		#adicionar pontos de interesse em stress_points{{{
@@ -182,7 +230,7 @@ class ShaftProject:
 				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
 
 		self.stress_points.sort()
-		print(self.stress_points)
+		#print(self.stress_points)
 		#}}}
 	#}}}
 	#clean{{{
@@ -215,7 +263,7 @@ class ShaftProject:
 					#break
 
 		for point in self.stress_points:
-			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
+			print(Goodman(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 1, 1), self.material[1], point[2], point[3], Ma, Tm))
 	#}}}
 	#CalcASME{{{
 	def CalcASME(self, shaft):
@@ -240,15 +288,22 @@ class ShaftProject:
 					Tm = self.plot_t[i][1]
 					#break
 
-			ny = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], 4.51, -0.265), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
+			nf = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
 
-			results.cell(0,15, 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), ny), ln=2)
+			results.cell(0,15, 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), nf), ln=2)
 
 		drawShaftinPDF(results, shaft, self.stress_points)
 		results.output("eixo.pdf")
 
 		webbrowser.open('eixo.pdf')
 	#}}}
+#}}}
+
+#Funcition DefineMaterial{{{
+def DefineMaterial(material):
+
+	materials_list = [[],[],[]] 
+
 #}}}
 
 #Function Se{{{
@@ -259,7 +314,19 @@ def Se(Sut, ka=1, kb=1, kc=1, kd=1, ke=1, kf=1):
 
 #Function ka{{{
 #function to calculate factor  ka.
-def ka(Sut, x, y):
+def ka(Sut, factory='Usinado'):
+
+	x = 0
+	y = 0
+
+	factory_methods = [['Retificado', 1.58, -0.085], ['Usinado', 4.51, -0.265], ['Laminado a quente', 57.7, -0.718], ['Forjado', 272, -0.995]]
+
+	for factory_meyhod in factory_methods:
+		if factory_meyhod[0] == factory:
+			x = factory_meyhod[1]
+			y = factory_meyhod[2]
+			break
+
 	return x*(Sut**y)
 #}}}
 

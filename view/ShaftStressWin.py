@@ -17,7 +17,8 @@ class ShaftStressWindow:
 		#}}}
 
 		#elementos de root.{{{
-		stress_list = ['flat key','stop ring']
+		#stress_list = ['flat key','stop ring']
+		stress_list = ['chaveta','anel de retenção']
 		self.stress = tk.StringVar()
 		self.combo_box_stress = ttk.Combobox(self.root, textvariable=self.stress, values=stress_list, state='readonly')
 		self.combo_box_stress.place(x=10, y=10, width=250, height=30)
@@ -86,20 +87,20 @@ class ShaftStressWindow:
 
 	#Function SwitchFrame{{{
 	def SwitchFrame(self, event):
-		if self.stress.get() == 'flat key':
+		if self.stress.get() == 'chaveta':
 			self.frame_flat_key.place(x=10, y=50)
 			self.frame_default.place_forget() if self.frame_default.winfo_ismapped() else self.frame_stop_ring.place_forget()
 
-		if self.stress.get() == 'stop ring':
+		if self.stress.get() == 'anel de retenção':
 			self.frame_stop_ring.place(x=10, y=50)
 			self.frame_default.place_forget() if self.frame_default.winfo_ismapped() else self.frame_flat_key.place_forget()
 	#}}}
 
 	def AddStress(self):
-		if self.stress.get() == 'flat key':
-			self.controller.AddStressToModel(float(self.x.get()), self.stress.get(), [float(self.l.get()), float(self.b.get())])
-		elif self.stress.get() == 'stop ring':
-			self.controller.AddStressToModel(float(self.x_stop_ring.get()), self.stress.get(), [float(self.d_stop_ring.get()), float(self.s_stop_ring.get())])
+		if self.stress.get() == 'chaveta':
+			self.controller.AddStressToModel(float(self.x.get()), 'flat key', [float(self.l.get()), float(self.b.get())])
+		elif self.stress.get() == 'anel de retenção':
+			self.controller.AddStressToModel(float(self.x_stop_ring.get()), 'stop ring', [float(self.d_stop_ring.get()), float(self.s_stop_ring.get())])
 			
 		self.controller.UpdateCanvas()
 		self.controller.UpdateStressTreeview()
