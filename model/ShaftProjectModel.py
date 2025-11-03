@@ -49,7 +49,6 @@ class ShaftProject:
 			self.material.append(15)
 			self.material.append(fac)
 		#}}}
-
 		#add forces and torque from the shaft{{{
 		for f in shaft.forces_xy:
 			self.plot_f_xy.append([f[0], f[2]])
@@ -97,7 +96,6 @@ class ShaftProject:
 		self.plot_f_xy.sort()
 		self.plot_f_xz.sort()
 		#}}}
-
 		#organize forces for plot{{{
 		points_to_add = []
 
@@ -146,7 +144,6 @@ class ShaftProject:
 
 		points_to_add = []
 		#}}}
-
 		#calculate bending mement by area{{{
 		for i in range(len(self.plot_f_xy)-1):
 			if self.plot_f_xy[i+1][0] != self.plot_f_xy[i][0]:
@@ -162,7 +159,6 @@ class ShaftProject:
 		for i in range(len(self.plot_m_xz)-1):
 			self.plot_m_xz[i+1][1] = self.plot_m_xz[i][1] + self.plot_m_xz[i+1][1]
 		#}}}
-
 		#Calculate Ftot{{{
 		for f in self.plot_f_xy:
 			self.plot_f_tot.append([f[0],0,0])
@@ -190,7 +186,6 @@ class ShaftProject:
 			point[1] = (point[1] + point[2])**0.5
 			point.pop(-1)
 		#}}}
-			
 		#calculate Mtot{{{
 		for m in self.plot_m_xy:
 			self.plot_m_tot.append([m[0],0,0])
@@ -218,7 +213,6 @@ class ShaftProject:
 			point[1] = (point[1] + point[2])**0.5
 			point.pop(-1)
 		#}}}
-			
 		#adicionar pontos de interesse em stress_points{{{
 		for s in shaft.stress:
 			self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
