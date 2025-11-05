@@ -60,10 +60,7 @@ class ShaftProject:
 			self.plot_f_xz.append([f[0], f[2]])
 
 			if f[1] != 0:
-				if (f[1] > 0 and f[2] < 0) or (f[1] < 0 and f[2] > 0):
-					self.plot_t.append([f[0], (f[1]*f[2])*(-1)])
-				else:
-					self.plot_t.append([f[0], f[1]*f[2]])
+				self.plot_t.append([f[0], f[1]*f[2]])
 
 		#calculate the reactions on supports of shaft
 		rxy1 = 0
@@ -161,10 +158,11 @@ class ShaftProject:
 		#}}}
 		#Calculate Ftot{{{
 		for f in self.plot_f_xy:
-			self.plot_f_tot.append([f[0],0,0])
+			if [f[0],0,0] not in self.plot_f_tot:
+				self.plot_f_tot.append([f[0],0,0])
 
 		for f in self.plot_f_xz:
-			if [f[0]] not in self.plot_f_tot:
+			if [f[0],0,0] not in self.plot_f_tot:
 				self.plot_f_tot.append([f[0],0,0])
 
 		self.plot_f_tot.sort()
@@ -173,18 +171,29 @@ class ShaftProject:
 			if self.plot_f_xy != []:
 				for j in range(len(self.plot_f_xy)-1):
 					if self.plot_f_tot[i][0] >= self.plot_f_xy[j][0] and self.plot_f_tot[i][0] <= self.plot_f_xy[j+1][0]:
-						self.plot_f_tot[i][1] = (Get_y(self.plot_f_xy[j][0], self.plot_f_xy[j][1], self.plot_f_xy[j+1][0], self.plot_f_xy[j+1][1], self.plot_f_tot[i][0]))**2
-						break
+						self.plot_f_tot[i][1] = (self.plot_f_xy[j+1][1])**2
+						#break
 
 			if self.plot_f_xz != []:
 				for j in range(len(self.plot_f_xz)-1):
 					if self.plot_f_tot[i][0] >= self.plot_f_xz[j][0] and self.plot_f_tot[i][0] <= self.plot_f_xz[j+1][0]:
-						self.plot_f_tot[i][2] = (Get_y(self.plot_f_xz[j][0], self.plot_f_xz[j][1], self.plot_f_xz[j+1][0], self.plot_f_xz[j+1][1], self.plot_f_tot[i][0]))**2
-						break
+						self.plot_f_tot[i][2] = (self.plot_f_xz[j+1][1])**2
+						#break
 
 		for point in self.plot_f_tot:
 			point[1] = (point[1] + point[2])**0.5
 			point.pop(-1)
+
+		for i in range(len(self.plot_f_tot)-1):
+			if self.plot_f_tot[i][0] != self.plot_f_tot[i+1][0]:
+				points_to_add.append([i+1, [self.plot_f_tot[i+1][0], self.plot_f_tot[i][1]]])
+
+		points_to_add.sort(reverse=True)
+
+		for p in points_to_add:
+			self.plot_f_tot.insert(p[0], p[1])
+
+		points_to_add = []
 		#}}}
 		#calculate Mtot{{{
 		for m in self.plot_m_xy:

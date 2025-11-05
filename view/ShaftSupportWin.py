@@ -19,10 +19,10 @@ class ShaftSupportWindow:
 		frame_sup = ttk.Labelframe(self.root, text='Suporte:', width=280, height=70)
 		frame_sup.place(x=10, y=5)
 
-		r1 = ttk.Radiobutton(frame_sup, text='1', value='0', variable=self.support)
+		r1 = ttk.Radiobutton(frame_sup, text='1(fixo)', value='0', variable=self.support)
 		r1.place(x=70, y=10)
 
-		r2 = ttk.Radiobutton(frame_sup, text='2', value='1', variable=self.support)
+		r2 = ttk.Radiobutton(frame_sup, text='2(simples)', value='1', variable=self.support)
 		r2.place(x=150, y=10)
 
 		self.text1 = tk.Label(self.root, text='x(mm):')

@@ -187,9 +187,9 @@ class ShaftController:
 				if force[1] != 0:
 					drawCircArrow(self.view.canvas_axial, 125, 125, True if (force[2] > 0 and force[1] > 0) or (force[2] < 0 and force[1] < 0) else False)
 
-			for support in self.model.supports:
-				drawSupport(self.view.canvas_long, (210-(Ltotal/2))+float(support)*fator, 125+30)
-
+			#draw supports
+			drawSupportPin(self.view.canvas_long, (210-(Ltotal/2))+float(self.model.supports[0])*fator, 125+30)
+			drawSupportRoller(self.view.canvas_long, (210-(Ltotal/2))+float(self.model.supports[1])*fator, 125+30)
 		
 		else:
 			self.view.button_next.config(state=tk.DISABLED)
@@ -279,8 +279,17 @@ def drawCircArrow(canvas, x, y, clockwise):
 #}}}
 
 #Function drawSupport{{{
-def drawSupport(canvas, x, y):
+def drawSupportPin(canvas, x, y):
 	canvas.create_polygon(((x-10,y+10),(x,y),(x+10,y+10)), fill='black')
+	canvas.create_line(((x-15, y+10),(x+15, y+10)), width=2, fill='black')
+	canvas.create_line(((x-10, y+10),(x-15, y+15)), width=2, fill='black')
+	canvas.create_line(((x, y+10),(x-5, y+15)), width=2, fill='black')
+	canvas.create_line(((x+10, y+10),(x+5, y+15)), width=2, fill='black')
+
+def drawSupportRoller(canvas, x, y):
+	canvas.create_polygon(((x-10,y+10),(x,y),(x+10,y+10)), fill='black')
+	canvas.create_line(((x-15, y+10),(x+15, y+10)), width=2, fill='black')
+	canvas.create_line(((x-15, y+15),(x+15, y+15)), width=2, fill='black')
 #}}}
 
 #Function drawKey{{{
@@ -316,8 +325,8 @@ def drawPlot(canvas, points, x, y, t):
 	x_scale = 300/points[-1][0]
 	y_scale = 200/(p_max - p_min)
 
-	canvas.create_line((x, y+(p_min*y_scale)), (x+350, y+(p_min*y_scale)), width=3, fill='black')
-	canvas.create_line((x, y), (x, y-205), width=3, fill='black')
+	canvas.create_line((x, y+(p_min*y_scale)), (x+350, y+(p_min*y_scale)), width=2, fill='black')
+	canvas.create_line((x, y), (x, y-205), width=2, fill='black')
 	canvas.create_polygon((x+355,y+(p_min*y_scale)),(x+345, y+(p_min*y_scale)-8),(x+345, y+(p_min*y_scale)+8), fill='black')
 	canvas.create_polygon((x,y-215),(x+8, y-205),(x-8, y-205), fill='black')
 	canvas.create_text(x+380, y+5+(p_min*y_scale), text='x(mm)', fill='black')
@@ -330,9 +339,10 @@ def drawPlot(canvas, points, x, y, t):
 
 		#linhas de pontos
 		canvas.create_line((x+ (points[i][0]*x_scale), y+(p_min*y_scale)+5), (x+(points[i][0]*x_scale), y+(p_min*y_scale)-5), width=3, fill='black')
+		canvas.create_rectangle((x-10+(points[i][0]*x_scale), y+(p_min*y_scale)+5), (x+(points[i][0]*x_scale+10), y+(p_min*y_scale)+20), fill='white', outline='white')
 		canvas.create_text((x+(points[i][0]*x_scale), y+(p_min*y_scale)+15),text=points[i][0], fill='black')
 
 		if points[i+1][1] != points[i][1]:
-			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=3, fill='black')
+			canvas.create_line((x+5, y+(p_min*y_scale)-(points[i][1]*y_scale)), (x-5, y+(p_min*y_scale)-(points[i][1]*y_scale)), width=2, fill='black')
 			canvas.create_text((x-35, y+(p_min*y_scale)-(points[i][1]*y_scale)),text='{:.1f}'.format(points[i][1]/1000), fill='black')
 #}}}
