@@ -16,11 +16,11 @@ class ShaftMainWindow:
 		self.root = tk.Tk()
 		self.controller = None
 
-		#window atributes
+		#window atributes{{{
 		self.root.geometry('700x650+{}+{}'.format(self.root.winfo_screenwidth()//2-350, self.root.winfo_screenheight()//2-325))
 		self.root.title('proshaft')
 		self.root.resizable(False, False)
-
+		#}}}
 		#root elements{{{
 		self.canvas_axial = tk.Canvas(self.root, width=250, height=250, bg='white')
 		self.canvas_axial.place(x=10, y=10)
@@ -28,10 +28,10 @@ class ShaftMainWindow:
 		self.canvas_long = tk.Canvas(self.root, width=420, height=250, bg='white')
 		self.canvas_long.place(x=270, y=10)
 
-		self.frame_draw = ttk.Labelframe(self.root, text='Seções:', width=680, height=325)
+		self.frame_draw = ttk.Labelframe(self.root, text='Desenho', width=680, height=325)
 		self.frame_draw.place(x=10, y=270)
 
-		self.frame_calc = ttk.Labelframe(self.root, text='Forças:', width=680, height=325)
+		self.frame_calc = ttk.Labelframe(self.root, text='Cargas', width=680, height=325)
 
 		self.frame_plots = ttk.Labelframe(self.root, text='Gráficos', width=680, height=325)
 
@@ -44,10 +44,10 @@ class ShaftMainWindow:
 		self.button_cancel = ttk.Button(self.root, text='Cancelar', command = self.root.quit)
 		self.button_cancel.place(x=310, y=610, width=120, height=30)
 		#}}}
-
 		#frame_draw elements{{{
 		self.tree_sections = ttk.Treeview(self.frame_draw)
 		self.tree_sections.place(x=5, y=0, width=330, height=260)
+		self.tree_sections.heading("#0", text="Seções")
 		treeviewScroll1 = tk.Scrollbar(self.tree_sections, orient=tk.VERTICAL)
 		treeviewScroll1.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -59,6 +59,7 @@ class ShaftMainWindow:
 
 		self.tree_stress = ttk.Treeview(self.frame_draw)
 		self.tree_stress.place(x=345, y=0, width=330, height=260)
+		self.tree_stress.heading("#0", text="Concentradores de tensão")
 		treeviewScroll3 = tk.Scrollbar(self.tree_stress, orient=tk.VERTICAL)
 		treeviewScroll3.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -68,10 +69,10 @@ class ShaftMainWindow:
 		button_remove_stress = ttk.Button(self.frame_draw, text='Remover stress', command = lambda :[self.RemoveStress(), self.controller.UpdateStressTreeview(), self.controller.UpdateCanvas()])
 		button_remove_stress.place(x=515, y=270, width=160, height=25)
 		#}}}
-
 		#frame_calc elements{{{
 		self.tree_forces = ttk.Treeview(self.frame_calc)
 		self.tree_forces.place(x=5, y=0, width=330, height=260)
+		self.tree_forces.heading("#0", text="Forças")
 		treeviewScroll2 = tk.Scrollbar(self.tree_forces, orient=tk.VERTICAL)
 		treeviewScroll2.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -102,7 +103,6 @@ class ShaftMainWindow:
 		button_open_support_win = ttk.Button(self.frame_calc, text='Editar suporte', command=self.OpenSupportWin)
 		button_open_support_win.place(x=350, y=235, width=310, height=25)
 		#}}}
-
 		#frame_plots elements{{{
 
 		self.listbox_plots = tk.Listbox(self.frame_plots)
@@ -121,10 +121,13 @@ class ShaftMainWindow:
 		self.canvas_plots.place(x=130, y=5)
 
 		#}}}
-
+	
+	#set controller{{{
 	def SetController(self, controller):
 		self.controller = controller
+	#}}}
 
+	#switch frames{{{
 	def SwitchFrames(self, go_next):
 		if(go_next):
 			if(self.frame_draw.winfo_ismapped()):
@@ -148,7 +151,9 @@ class ShaftMainWindow:
 				self.controller.CleanCalc()
 				self.frame_calc.place(x=10, y=270)
 				self.frame_plots.place_forget()
+	#}}}
 
+	#open windows{{{
 	def OpenSectionWin(self):
 		SectionWindow = SecWin.ShaftSectionWindow(self.root, self.controller)
 
@@ -160,24 +165,34 @@ class ShaftMainWindow:
 
 	def OpenSupportWin(self):
 		SupportWindow = SupWin.ShaftSupportWindow(self.root, self.controller)
+	#}}}
 
+	#remove section{{{
 	def RemoveSection(self):
 		s = self.tree_sections.focus()
 		self.controller.RemoveSection(self.tree_sections.index(s))
+	#}}}
 
+	#remove stress{{{
 	def RemoveStress(self):
 		s = self.tree_stress.focus()
 		self.controller.RemoveStress(self.tree_stress.index(s))
+	#}}}
 
+	#remove force{{{
 	def RemoveForce(self):
 		f = self.tree_forces.focus()
 		self.controller.RemoveForce(self.tree_forces.index(f))
+	#}}}
 
+	#draw the plots{{{
 	def DrawPlot(self, event):
 		for i in self.listbox_plots.curselection():
 			self.controller.PlotInCanvas(self.listbox_plots.get(i))
 			print(self.listbox_plots.get(i))
+	#}}}
 
+	#draw elements on canvas{{{
 	def DrawOrientationCanvas(self):
 		self.canvas_axial.create_line(((240,240),(240,220)), fill='green', width=1)
 		self.canvas_axial.create_line(((240,240),(220,240)), fill='blue', width=1)
@@ -191,6 +206,7 @@ class ShaftMainWindow:
 		self.canvas_long.create_polygon(((30,235),(40,240),(30,245)),fill='red')
 		self.canvas_long.create_text((45, 240), text='x', fill='red', font='tkDefaultFont 10')
 		self.canvas_long.create_text((10, 200), text='y', fill='green', font='tkDefaultFont 10')
+	#}}}
 
 	def run(self):
 		self.root.mainloop()

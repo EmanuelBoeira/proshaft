@@ -58,7 +58,7 @@ class ShaftStressWindow:
 		self.b.place(x=60, y=70, width=100)
 
 		self.flat_key_img = tk.PhotoImage(file='./assets/flat-key.png')
-		ttk.Label(self.frame_flat_key, image=self.flat_key_img).place(x=200, y=10, width=50, height=50)
+		ttk.Label(self.frame_flat_key, image=self.flat_key_img).place(x=200, y=10, width=150, height=150)
 		#}}}
 
 		#frame_stop_ring elements{{{
