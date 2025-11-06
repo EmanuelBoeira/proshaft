@@ -100,10 +100,10 @@ class ShaftController:
 		#put the forces info in treeview
 		if self.model.forces_xy != []:
 			for force in self.model.forces_xy:
-				self.view.tree_forces.insert('', tk.END, text='F(XY): %s N'%(force[2]))
+				self.view.tree_forces.insert('', tk.END, text='F(XY): %s mm, %s N'%(force[0], force[2]))
 		if self.model.forces_xz != []:
 			for force in self.model.forces_xz:
-				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s N'%(force[2]))
+				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s mm, %s N'%(force[0], force[2]))
 	#}}}
 	#add force to model
 	#AddForceToModel{{{
