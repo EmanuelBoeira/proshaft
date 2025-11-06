@@ -233,7 +233,7 @@ class ShaftProject:
 				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
 
 		self.stress_points.sort()
-		#print(self.stress_points)
+		print(self.stress_points)
 		#}}}
 	#}}}
 	#clean{{{
@@ -290,8 +290,11 @@ class ShaftProject:
 				if point[0] >= self.plot_t[i][0] and point[0] < self.plot_t[i+1][0]:
 					Tm = self.plot_t[i][1]
 					#break
-
-			nf = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
+			
+			if Ma != 0:
+				nf = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
+			else:
+				nf = 0
 
 			results.cell(0,15, 'nf({}) = {}'.format(chr(97+self.stress_points.index(point)), nf), ln=2)
 
