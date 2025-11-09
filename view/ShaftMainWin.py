@@ -134,14 +134,14 @@ class ShaftMainWindow:
 				self.frame_calc.place(x=10, y=270)
 				self.frame_draw.place_forget()
 			elif(self.frame_calc.winfo_ismapped()):
-				self.controller.CalculateShaft(self.material.get(), self.fabrication.get())
 				if self.material.get() != '':
+					self.controller.CalculateShaft(self.material.get(), self.fabrication.get())
 					self.frame_plots.place(x=10, y=270)
 					self.frame_calc.place_forget()
 					print('calculando...')
 			elif(self.frame_plots.winfo_ismapped()):
 				print('gerar pdf...')
-				self.controller.CalculateGoodman()
+				#self.controller.CalculateGoodman()
 				self.controller.CalculateASME()
 		else:
 			if(self.frame_calc.winfo_ismapped()):

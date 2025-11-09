@@ -196,9 +196,9 @@ class ShaftController:
 	#}}}
 	#calculate reactions em bending moments
 	#CalculateShaft{{{
-	def CalculateShaft(self, m, fac):
+	def CalculateShaft(self, m, fab):
 		if m != '':
-			self.shaft_project = ShaftProject.ShaftProject(self.model, m, fac)
+			self.shaft_project = ShaftProject.ShaftProject(self.model, m, fac=fab)
 			print(self.shaft_project.material)
 		else:
 			showwarning(title='Material não definido!', message='Defina um material para o eixo.')
