@@ -14,7 +14,7 @@ class ShaftProject:
 	stress_points = [] # [x, d, Kf, Kfs]
 
 	#init{{{
-	def __init__(self, shaft, mat, fac):
+	def __init__(self, shaft, mat, fac='Usinado'):
 		#clean the variables and aply initial conditions{{{
 		self.plot_f_xy.append([0,0])
 		self.plot_f_xz.append([0,0])
@@ -290,7 +290,8 @@ class ShaftProject:
 				if point[0] >= self.plot_t[i][0] and point[0] < self.plot_t[i+1][0]:
 					Tm = self.plot_t[i][1]
 					#break
-			
+	
+			print(point)
 			if Ma != 0:
 				nf = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
 			else:
