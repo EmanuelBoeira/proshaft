@@ -223,14 +223,34 @@ class ShaftProject:
 			point.pop(-1)
 		#}}}
 		#adicionar pontos de interesse em stress_points{{{
+		#stress_point = [x position, diamiter, Kf, Kfs]
+		#add stress concentraton points for flat key and stop ring
 		for s in shaft.stress:
-			self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(s[2], q_bending(s[1]/2, self.material[1])), Kfs(s[2], q_torsion(s[1]/2, self.material[1]))])
+			if s[2] == 'flat key':
+				self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(2.14, q_bending(s[1]/2, self.material[1])), Kfs(3, q_torsion(s[1]/2, self.material[1]))])
 
+			elif s[2] == 'stop ring':
+				self.stress_points.append([s[0]+(s[3][0]/2), s[1], Kf(5, q_bending(s[1]/2, self.material[1])), Kfs(3, q_torsion(s[1]/2, self.material[1]))])
+
+		#add stress concetration for diamiter variation
 		for i in range(len(shaft.sections)-1):
 			if shaft.sections[i][1][1] < shaft.sections[i+1][0][1]:
-				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
+				kt = Kt(shaft.sections[i+1][1][1]*2, shaft.sections[i][0][1]*2)
+				kts = Kts(shaft.sections[i+1][1][1]*2, shaft.sections[i][0][1]*2)
+
+				self.stress_points.append([shaft.sections[i][1][0], shaft.sections[i][1][1]*2, Kf(kt, q_bending(self.material[1])), Kfs(kts, q_torsion(self.material[1]))])
+
+				print("q bend: {} Kt: {}".format(q_bending(self.material[1]), kt))
+				print("q tors: {} Kts: {}".format( q_torsion(self.material[1]), kts))
+
 			else:
-				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i][0][1]*2, Kf('diameter-0.02', q_bending(self.material[1])), Kfs('diameter-0.02', q_torsion(self.material[1]))])
+				kt = Kt(shaft.sections[i][1][1]*2, shaft.sections[i+1][0][1]*2)
+				kts = Kts(shaft.sections[i][1][1]*2, shaft.sections[i+1][0][1]*2)
+
+				self.stress_points.append([shaft.sections[i+1][0][0], shaft.sections[i+1][0][1]*2, Kf(kt, q_bending(self.material[1])), Kfs(kts, q_torsion(self.material[1]))])
+
+				print("q bend: {} Kt: {}".format(q_bending(self.material[1]), kt))
+				print("q tors: {} Kts: {}".format( q_torsion(self.material[1]), kts))
 
 		self.stress_points.sort()
 		print(self.stress_points)
@@ -293,6 +313,7 @@ class ShaftProject:
 	
 			print(point)
 			if Ma != 0:
+				print('Ma: {} Tm: {}'.format(Ma, Tm))
 				nf = ASME_Elliptic(point[1], Se(self.material[1], ka(self.material[1], self.material[3]), kb(point[1]), 1, 1, 0.814, 1), self.material[2], point[2], point[3], Ma, Tm)
 			else:
 				nf = 0
@@ -369,34 +390,58 @@ def ke(conf):
 		return 0.753
 #}}}
 
-#Function Kf{{{
-def Kf(stress, q):
-	#list of stresses. [stress, Kt, Kts, value for selection]
-	stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+#Functions Kt and Kts{{{
+def Kt(D, d, r=4):
+	t = (D - d)/2
+	C1 = 0.947 + 1.206*(t/r)**0.5 - 0.131*(t/r)
+	C2 = 0.022 - 3.405*(t/r)**0.5 + 0.915*(t/r)
+	C3 = 0.869 + 1.777*(t/r)**0.5 - 0.555*(t/r)
+	C4 = -0.81 + 0.422*(t/r)**0.5 - 0.260*(t/r)
 
-	for s in stress_list:
-		if s[0] == stress:
-			return 1+(q*(s[1]-1))
-			break
+	return C1 + C2*(2*t/D) + C3*(2*t/D)**2 + C4*(2*t/D)**3
+
+def Kts(D, d, r=4):
+	t = (D - d)/2
+	C1 =  0.905 + 0.783*(t/r)**0.5 - 0.075*(t/r)
+	C2 = -0.437 - 1.969*(t/r)**0.5 + 0.553*(t/r)
+	C3 =  1.557 + 1.073*(t/r)**0.5 - 0.578*(t/r)
+	C4 = -1.061 + 0.171*(t/r)**0.5 - 0.086*(t/r)
+
+	return C1 + C2*(2*t/D) + C3*(2*t/D)**2 + C4*(2*t/D)**3
+#}}}
+
+#Function Kf{{{
+def Kf(Kt, q):
+	#list of stresses. [stress, Kt, Kts, value for selection]
+	#stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+
+	#for s in stress_list:
+	#	if s[0] == stress:
+	#		return 1+(q*(s[1]-1))
+	#		break
+
+	return 1+(q*(Kt-1))
 #}}}
 
 #Function Kfs{{{
-def Kfs(stress, q):
+def Kfs(Kts, q):
 	#list of stresses. [stress, Kt, Kts, value for selection]
-	stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
+	#stress_list = [['diameter-0.02', 2.7, 2.2, 0.02], ['diameter-0.1', 1.7, 1.5, 0.1], ['flat key', 2.14, 3, 0.02], ['stop ring', 5, 3, 0]]
 
-	for s in stress_list:
-		if s[0] == stress:
-			return 1+(q*(s[2]-1))
-			break
+	#for s in stress_list:
+	#	if s[0] == stress:
+	#		return 1+(q*(s[2]-1))
+	#		break
+
+	return 1+(q*(Kts-1))
 #}}}
 
 #Functions q{{{
 #r é o raio do entalhe (entre 0 e 4 mm). Sut deve estar em MPa que é convertido em kpsi
-def q_torsion(Sut, r=0.1):
+def q_torsion(Sut, r=0.16):
 	Sut = Sut*0.145
 	return 1/(1+((0.19-(0.00251*Sut)+(0.0000135*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
-def q_bending(Sut, r=0.1):
+def q_bending(Sut, r=0.16):
 	Sut = Sut*0.145
 	return 1/(1+((0.246-(0.00308*Sut)+(0.0000151*Sut**2)-(0.0000000267*Sut**3))/(r**0.5)))
 #}}}
@@ -408,6 +453,7 @@ def Goodman(d, Se, Sut, Kf, Kfs, Ma, Tm):
 
 #Function ASME-Elliptic{{{
 def ASME_Elliptic(d, Se, Sy, Kf, Kfs, Ma, Tm):
+	print(Se)
 	return (3.1415 * (d**3))/(16*((4*((Kf*Ma/Se)**2) + 3*((Kfs*Tm/Sy)**2))**0.5))
 #}}}
 
