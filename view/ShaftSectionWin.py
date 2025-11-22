@@ -40,4 +40,4 @@ class ShaftSectionWindow:
 	#	self.controller = controller
 
 	def AddSection(self):
-		self.controller.AddSectionToModel(0, (float(self.d.get())/2), float(self.l.get()), (float(self.d.get())/2))
+		self.controller.AddSectionToModel(float(self.d.get()), float(self.l.get()))

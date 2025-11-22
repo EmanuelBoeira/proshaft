@@ -1,5 +1,4 @@
 #main window for shaft project
-#arrumar posições e textos :(
 #imports{{{
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -22,11 +21,8 @@ class ShaftMainWindow:
 		self.root.resizable(False, False)
 		#}}}
 		#root elements{{{
-		self.canvas_axial = tk.Canvas(self.root, width=250, height=250, bg='white')
-		self.canvas_axial.place(x=10, y=10)
-
-		self.canvas_long = tk.Canvas(self.root, width=420, height=250, bg='white')
-		self.canvas_long.place(x=270, y=10)
+		self.canvas_long = tk.Canvas(self.root, width=680, height=250, bg='white')
+		self.canvas_long.place(x=10, y=10)
 
 		self.frame_draw = ttk.Labelframe(self.root, text='Desenho', width=680, height=325)
 		self.frame_draw.place(x=10, y=270)
@@ -194,18 +190,14 @@ class ShaftMainWindow:
 
 	#draw elements on canvas{{{
 	def DrawOrientationCanvas(self):
-		self.canvas_axial.create_line(((240,240),(240,220)), fill='green', width=1)
-		self.canvas_axial.create_line(((240,240),(220,240)), fill='blue', width=1)
-		self.canvas_axial.create_polygon(((235,220),(240,210),(245,220)),fill='green')
-		self.canvas_axial.create_polygon(((220,235),(210,240),(220,245)),fill='blue')
-		self.canvas_axial.create_text((200, 240), text='z', fill='blue', font='tkDefaultFont 10')
-		self.canvas_axial.create_text((240, 200), text='y', fill='green', font='tkDefaultFont 10')
+		self.canvas_long.create_line((10, 125),(670, 125), fill='black', dash=(20,8))
 		self.canvas_long.create_line(((10,240),(10,220)), fill='green', width=1)
 		self.canvas_long.create_line(((10,240),(30,240)), fill='red', width=1)
 		self.canvas_long.create_polygon(((5,220),(10,210),(15,220)),fill='green')
 		self.canvas_long.create_polygon(((30,235),(40,240),(30,245)),fill='red')
 		self.canvas_long.create_text((45, 240), text='x', fill='red', font='tkDefaultFont 10')
 		self.canvas_long.create_text((10, 200), text='y', fill='green', font='tkDefaultFont 10')
+		self.canvas_long.create_oval((5, 235), (15, 245), fill='blue')
 	#}}}
 
 	def run(self):

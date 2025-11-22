@@ -16,10 +16,11 @@ import ShaftMainWin as MainWin
 #Class ShaftController{{{
 class ShaftController:
 	
-	shaft_project = None
+	shaft_project = ShaftProject.ShaftProject()
+	shaft_total_length = 0
 
-	#init
-	#init the class{{{
+	#init{{{
+	#init the class
 	def __init__(self, model, view):
 		self.model = model
 		self.view = view
@@ -27,52 +28,51 @@ class ShaftController:
 		#define quais botoẽs estarão disponíveis na inicialização
 		if (self.model.sections == []):
 			self.view.button_next.config(state=tk.DISABLED)
-			#self.view.buttonCalc.state(['disabled'])
 	#}}}
-	#add a section to the model shaft
 	#AddSectionToModel{{{
-	def AddSectionToModel(self, x1, y1, x2, y2):
-		if self.model.sections == []:
-			self.model.AddSection(x1, y1, x2, y2)
-		else:
-			x = float(self.model.sections[-1][1][0])
-			self.model.AddSection(x, y1, (x+x2), y2)
+	#add a section to the model shaft
+	def AddSectionToModel(self, diamiter, length):
+		self.model.AddSection(diamiter, length)
+		self.shaft_total_length = self.shaft_total_length + length
 	#}}}
-	#remove section
 	#RemoveSection{{{
+	#remove section
 	def RemoveSection(self, i):
 		for x in range(len(self.model.sections)-i):
+			self.shaft_total_length = self.shaft_total_length - self.model.sections[i][1]
 			self.model.RemoveSection(i)
 	#}}}
-	#add methods to add e remove stress
 	#AddStressToModel{{{
-	def AddStressToModel(self, x, stress, variables):
-		if self.model.sections[-1][1][0] > x:
-			if stress == 'stop ring':
-				for s in self.model.sections:
-					if x >= s[0][0] and x < s[1][0]:
-						if s[0][1]*2 > variables[0]:
-							self.model.AddStress(x, s[0][1]*2, stress, variables)
+	def AddStressToModel(self, x_stress, stress, variables):
+		x = 0
+
+		if self.shaft_total_length > x_stress:
+			for section in self.model.sections:
+				if x_stress >= x and x_stress < x+section[1]:
+					if stress == 'stop ring':
+						if section[0] > variables[0]:
+							self.model.AddStress(x_stress, section[0], stress, variables)
 							break
 						else:
 							showwarning(title='Diâmetro inadequado', message='Valor de d ultrapassa o diâmetro desta seção do eixo.')
+							break
 
-			elif stress == 'flat key':
-				for s in self.model.sections:
-					if x >= s[0][0] and x < s[1][0]:
-						self.model.AddStress(x, s[0][1]*2, stress, variables)
+					elif stress == 'flat key':
+						self.model.AddStress(x_stress, section[0], stress, variables)
 						break
+
+				x = x + section[1]
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-	#remove stress from the model
 	#RemoveStress{{{
+	#remove stress from the model
 	def RemoveStress(self, i):
 		for stress in self.model.stress:
 			self.model.RemoveStress(i)
 	#}}}
-	#update the informations of sections treeview
 	#UpdateSectionTreeview{{{
+	#update the informations of sections treeview
 	def UpdateSectionTreeview(self):
 		#clean treeview
 		for i in self.view.tree_sections.get_children():
@@ -80,10 +80,10 @@ class ShaftController:
 		#if has sections of the shaft, they are add to treeview		
 		if self.model.sections != []:
 			for section in self.model.sections:
-				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(((section[0][1])*2, (section[1][0]-section[0][0]))))
+				self.view.tree_sections.insert('', tk.END, text='D: %s mm L: %s mm'%(section[0], section[1]))
 	#}}}
-	#update the informations of stress treeview
 	#UpdateStressTreeview{{{
+	#update the informations of stress treeview
 	def UpdateStressTreeview(self):
 		for i in self.view.tree_stress.get_children():
 			self.view.tree_stress.delete(i)
@@ -91,8 +91,8 @@ class ShaftController:
 			for stress in self.model.stress:
 				self.view.tree_stress.insert('', tk.END, text='%s, x: %s mm'%(stress[2], stress[0]))
 	#}}}
-	#update the info of treeview forces
 	#UpdateForceTreeview{{{
+	#update the info of treeview forces
 	def UpdateForceTreeview(self):
 		#clean treeview
 		for i in self.view.tree_forces.get_children():
@@ -105,111 +105,114 @@ class ShaftController:
 			for force in self.model.forces_xz:
 				self.view.tree_forces.insert('', tk.END, text='F(XZ): %s mm, %s N'%(force[0], force[2]))
 	#}}}
-	#add force to model
 	#AddForceToModel{{{
+	#add force to model
 	def AddForceToModel(self, x, y, plane_xy, F):
-		if self.model.sections[-1][1][0] > x:
+		if self.shaft_total_length > x:
 			self.model.AddForce(x, y, plane_xy, F)
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-	#remove force from model
 	#RemoveForce{{{
+	#remove force from model
 	def RemoveForce(self, i):
 		if i >= len(self.model.forces_xy):
 			self.model.RemoveForce(i-len(self.model.forces_xy), False)
 		else:
 			self.model.RemoveForce(i, True)
 	#}}}
-	#modify the distance x of the support i
 	#ModifySupport{{{
+	#modify the distance x of the support i
 	def ModifySupport(self, x, i):
-		if self.model.sections[-1][1][0] > x:
+		if self.shaft_total_length> x:
 			self.model.ModifySupport(x, i)
 		else:
 			showwarning(title='Posição inadequada', message='Valor de x ultrapassa o comprimento total do eixo.')
 	#}}}
-	#update long and axal canvas
-	#{{{update canvas_long and canvas_axial
+	#UpdateCanvas{{{
+	#update long canvas
 	def UpdateCanvas(self):
 		#clean canvas
 		self.view.canvas_long.delete('all')
-		self.view.canvas_axial.delete('all')
 
 		self.view.DrawOrientationCanvas()
 
 		if self.model.sections != []:
-
 			#habilita botão next
 			if self.view.button_next["state"] != "normal":
 				self.view.button_next.config(state=tk.NORMAL)
 
+			#identify the factor of scale to draw the sections inside the canvas{{{
 			fator = 1
 
-			#identify the factor of scale to draw the sections inside the canvas
-			if int(self.model.sections[-1][1][0]) > 400:
-				fator = 400/self.model.sections[-1][1][0]
-
 			for section in self.model.sections:
-				if int((section[0][1]*2)) > 200:
-					if (200/int(section[0][1]*2)) < fator:
-						fator = 220/int(section[0][1]*2)
+				if section[0] > fator:
+					fator = section[0]
 
+			if (220/fator) < (660/self.shaft_total_length):
+				fator = 220/fator
+			else:
+				fator = 660/self.shaft_total_length
+
+			#}}}
+			
 			#total length of shaft in x
-			Ltotal = int(self.model.sections[-1][1][0]*fator)
+			Ltotal = int(self.shaft_total_length*fator)
+			#x position for draw sections
+			x = 0
 
-			radius = 0
-
-			#draw the section os the shaft.
+			#draw sections of shaft{{{
 			for section in self.model.sections:
-				self.view.canvas_long.create_rectangle((int((210-(Ltotal/2))+(section[0][0]*fator)), int((125-(section[0][1]*fator)))), (int((210-(Ltotal/2))+(section[1][0]*fator)), int((125+(section[1][1]*fator)))), outline='black', width=2)
-				
-				if section[0][1] > radius:
-					radius = section[0][1]
-					self.view.canvas_axial.create_oval((int(125-radius*fator), int(125-radius*fator)),(int(125+radius*fator),int(125+radius*fator)), outline='black', width=2)
-
-			#draws each type of stress concentration on canvas
+				self.view.canvas_long.create_rectangle((int(340-(Ltotal/2)+x), int(125-(section[0]*fator/2))), (int(340-(Ltotal/2)+x+(section[1]*fator)), int(125+(section[0]*fator/2))), outline='black', width=2)
+				x = x + (section[1]*fator)
+			#}}}
+			#draw stress concentration{{{
 			if self.model.stress != []:
 				for stress in self.model.stress:
 					if stress[2] == 'flat key':
-						drawFlatKey(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator , 125, stress[3][0]*fator, stress[3][1]*fator)
-					if stress[2] == 'stop ring':
-						drawStopRing(self.view.canvas_long, (210-(Ltotal/2))+stress[0]*fator, 125, stress[1]*fator, stress[3][0]*fator, stress[3][1]*fator)
-
-			#draw arrows for each force in the model
+						drawFlatKey(self.view.canvas_long, (340-(Ltotal/2))+stress[0]*fator , 125, stress[3][0]*fator, stress[3][1]*fator)
+					elif stress[2] == 'stop ring':
+						drawStopRing(self.view.canvas_long, (340-(Ltotal/2))+stress[0]*fator, 125, stress[1]*fator, stress[3][0]*fator, stress[3][1]*fator)
+			#}}}
+			#draw arrows for each force{{{
+			#forces XY
 			for force in self.model.forces_xy:
-				drawArrowV(self.view.canvas_long, (210-(Ltotal/2))+(float(force[0])*fator), 125, True if force[2] > 0 else False)
+				drawForceY(self.view.canvas_long, (340-(Ltotal/2))+(float(force[0])*fator), 125, True if force[2] > 0 else False)
 				if force[1] != 0:
-					drawCircArrow(self.view.canvas_axial, 125, 125, True if (force[2] > 0 and force[1] < 0) or (force[2] < 0 and force[1] > 0) else False)
-
+					drawCircArrow(self.view.canvas_long, (340-(Ltotal/2))+(float(force[0])*fator), 125, True if (force[2] > 0 and force[1] < 0) or (force[2] < 0 and force[1] > 0) else False)
+			#forces XZ
 			for force in self.model.forces_xz:
-				drawArrowH(self.view.canvas_axial, 125, 125, False if force[2] > 0 else True)
+				if force[2] <= 0:
+					drawForceZ(self.view.canvas_long, (340-(Ltotal/2))+(float(force[0])*fator), 125)
 				if force[1] != 0:
-					drawCircArrow(self.view.canvas_axial, 125, 125, True if (force[2] > 0 and force[1] > 0) or (force[2] < 0 and force[1] < 0) else False)
-
-			#draw supports
-			drawSupportPin(self.view.canvas_long, (210-(Ltotal/2))+float(self.model.supports[0])*fator, 125+30)
-			drawSupportRoller(self.view.canvas_long, (210-(Ltotal/2))+float(self.model.supports[1])*fator, 125+30)
-		
+					drawCircArrow(self.view.canvas_long, (340-(Ltotal/2))+(float(force[0])*fator), 125, True if (force[2] > 0 and force[1] > 0) or (force[2] < 0 and force[1] < 0) else False)
+			#}}}
+			#draw supports{{{
+			drawSupportPin(self.view.canvas_long, (340-(Ltotal/2))+float(self.model.supports[0])*fator, 125)
+			drawSupportRoller(self.view.canvas_long, (340-(Ltotal/2))+float(self.model.supports[1])*fator, 125)
+			#}}}
 		else:
 			self.view.button_next.config(state=tk.DISABLED)
 	#}}}
-	#calculate reactions em bending moments
 	#CalculateShaft{{{
-	def CalculateShaft(self, m, fab):
-		if m != '':
-			self.shaft_project = ShaftProject.ShaftProject(self.model, m, fac=fab)
-			print(self.shaft_project.material)
-		else:
+	def CalculateShaft(self, material, fabrication_method):
+		if material == '':
 			showwarning(title='Material não definido!', message='Defina um material para o eixo.')
+		elif self.model.supports[0] == self.model.supports[1]:
+			showwarning(title='Suportes sobrepostos!', message='Os suportes não podem estar a mesma posição! Por favor edite pelo menos um dos suportes.')
+		else:
+			self.shaft_project.Clean()
+			self.shaft_project.DefineMaterial(material, fabrication_method)
+			self.shaft_project.GeneratePlots(self.model)
+			print(self.shaft_project.material)
 			
 	#}}}
 	#clean the values calculated in project{{{
 	def CleanCalc(self):
 		self.shaft_project.Clean()
 	#}}}
-	#plot math data in canvas from the last frame
 	#PlotInCanvas{{{
+	#plot math data in canvas from the last frame
 	def PlotInCanvas(self, plot):
 		self.view.canvas_plots.delete('all')
 
@@ -234,7 +237,6 @@ class ShaftController:
 		if plot == 'Torque':
 			drawPlot(self.view.canvas_plots, self.shaft_project.plot_t, 100, 250, 'T(N.m)')
 	#}}}
-	#fazer isso no ShaftProjectModel
 	#CalculateGoodman{{{
 	def CalculateGoodman(self):
 		self.shaft_project.CalcGoodman()
@@ -245,37 +247,42 @@ class ShaftController:
 	#}}}
 #}}}
 
-#Function drawArrowV{{{
-#functions to draw elements in canvas
-def drawArrowV(canvas, x, y, positive):
+#drawForces{{{
+def drawForceY(canvas, x, y, positive) -> None:
 	if positive:
-		canvas.create_polygon(((x+5,y+10),(x,y),(x-5,y+10)),fill='green')
-		canvas.create_line(((x,y+10),(x,y+40)),width=4,fill='green')
+		canvas.create_polygon(((x+10,y+20),(x,y),(x-10,y+20)), outline='black', fill='green')
+		canvas.create_rectangle((x-3, y+20),(x+3, y+80), fill='green', outline='black')
+		canvas.create_line(((x-3,y+20),(x+3,y+20)), width=4, fill='green')
 
 	else:
-		canvas.create_polygon(((x-5,y-10),(x,y),(x+5,y-10)),fill='green')
-		canvas.create_line(((x,y-10),(x,y-40)),width=4,fill='green')
-#}}}
+		canvas.create_polygon(((x-10,y-20),(x,y),(x+10,y-20)), outline='black', fill='green')
+		canvas.create_rectangle((x-3, y-20),(x+3, y-80), fill='green', outline='black')
+		canvas.create_line(((x-3,y-20),(x+3,y-20)),width=4, fill='green')
 
-#Function drawArrowH{{{
-def drawArrowH(canvas, x, y, positive):
+def drawForceZ(canvas, x, y) -> None:
+	canvas.create_oval(((x-10, y-10),(x+10, y+10)), outline='black', fill='blue')
+	canvas.create_oval(((x-3, y-3),(x+3, y+3)), outline='black', fill='blue')
+
+def drawForceX(canvas, x, y, positive):
 	if positive:
-		canvas.create_polygon(((x,y),(x-10,y+5),(x-10,y-5)), fill='blue')
-		canvas.create_line(((x-10, y),(x-40,y)), width=4, fill='blue')
+		canvas.create_polygon(((x,y),(x-20,y+10),(x-20,y-10)), fill='red')
+		canvas.create_rectangle((x-20, y-3),(x-80, y+3), fill='red', outline='black')
+		canvas.create_line(((x-20, y-3),(x-20,y+3)), width=4, fill='red')
 	
 	else:
-		canvas.create_polygon(((x,y),(x+10,y-5),(x+10,y+5)), fill='blue')
-		canvas.create_line(((x+10, y),(x+40,y)), width=4, fill='blue')
+		canvas.create_polygon(((x,y),(x+20,y-10),(x+20,y+10)), fill='red')
+		canvas.create_rectangle((x+20, y-3),(x+80, y+3), fill='red', outline='black')
+		canvas.create_line(((x+20, y-3),(x+20,y+3)), width=4, fill='red')
 #}}}
 
 #Function drawCircArrow{{{
 def drawCircArrow(canvas, x, y, clockwise):
 	if clockwise:
-		canvas.create_arc((x-60, y+60), (x+60, y-60), start=330, extent=60, style=tk.ARC, width=4, outline='red')
-		canvas.create_polygon((x+48, y-27.5), (x+56, y-32.5), (x+47, y-38.7), fill='red')
+		canvas.create_arc((x-60, y+60), (x+60, y-60), start=330, extent=60, style=tk.ARC, width=6, outline='red')
+		canvas.create_polygon((x+43, y-22.5), (x+61, y-36.5), (x+42, y-43.7), fill='red')
 	else:
-		canvas.create_arc((x-60, y+60), (x+60, y-60), start=150, extent=60, style=tk.ARC, width=4, outline='red')
-		canvas.create_polygon((x-48, y-27.5), (x-56, y-32.5), (x-47, y-38.7), fill='red')
+		canvas.create_arc((x-60, y+60), (x+60, y-60), start=150, extent=60, style=tk.ARC, width=6, outline='red')
+		canvas.create_polygon((x-43, y-22.5), (x-61, y-36.5), (x-42, y-43.7), fill='red')
 #}}}
 
 #Function drawSupport{{{
@@ -292,7 +299,7 @@ def drawSupportRoller(canvas, x, y):
 	canvas.create_line(((x-15, y+15),(x+15, y+15)), width=2, fill='black')
 #}}}
 
-#Function drawKey{{{
+#Function drawFlatKey{{{
 def drawFlatKey(canvas, x, y, l, b):
 	canvas.create_rectangle(((x+(b/2),y-(b/2)),(x+l-(b/2), y+(b/2))), outline='black', width=2)
 	canvas.create_oval(((x, y-(b/2)),(x+b, y+(b/2))), outline='black', width=2)
