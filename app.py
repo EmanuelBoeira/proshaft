@@ -16,13 +16,13 @@ main_win = MainWin.ShaftMainWindow()
 shaft = Shaft.Shaft()
 
 #teste
-shaft.AddSection(0,15,30,15)
-shaft.AddSection(30,17.5,44,17.5)
-shaft.AddSection(44,21,90,21)
-shaft.AddSection(90,25,190,25)
-shaft.AddSection(190,21,245,21)
-shaft.AddSection(245,17.5,255,17.5)
-shaft.AddSection(255,15,286,15)
+shaft.AddSection(30,30)
+shaft.AddSection(35, 14)
+shaft.AddSection(42, 46)
+shaft.AddSection(50, 100)
+shaft.AddSection(42, 55)
+shaft.AddSection(35, 10)
+shaft.AddSection(30,31)
 shaft.AddForce(70, 0, True, -876)
 shaft.AddForce(70, 150, False, 2400)
 shaft.AddForce(215, 0, True, -3937)
@@ -33,6 +33,7 @@ shaft.ModifySupport(270,1)
 control = ShaftControl.ShaftController(shaft, main_win)
 
 #teste
+control.shaft_total_length = 286.0
 control.UpdateSectionTreeview()
 control.UpdateForceTreeview()
 control.UpdateCanvas()
